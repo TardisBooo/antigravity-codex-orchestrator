@@ -1,5 +1,10 @@
 # ⚡ Antigravity Codex Orchestrator
+
 > **The Autonomous Hybrid Multi-Agent Playbook uniting Google Antigravity, OpenAI Codex CLI (`gpt-6.2-sol max`), Gemini 4 Argon, Gemini 3.8 Flash & Gemini TTS.**
+
+<p align="center">
+  <strong>English</strong> | <a href="README.zh-CN.md">简体中文</a>
+</p>
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Antigravity](https://img.shields.io/badge/Antigravity-2.0%2B-purple.svg)](https://deepmind.google/technologies/gemini/)
@@ -10,23 +15,23 @@
 
 ---
 
-## 🌟 Overview / 概览
+## 🌟 Overview
 
 **Antigravity Codex Orchestrator** is an open-source, modular, zero-intrusion engineering playbook designed for next-generation multi-agent software engineering.
 
-Instead of locking developers into brittle, black-box scripts, this playbook leverages the native strengths of Google and OpenAI frontier models in an auditable assembly line:
+Instead of locking developers into brittle, black-box scripts, this playbook leverages the native strengths of Google and OpenAI frontier models in an auditable, Swarm-like assembly line:
 
 | Agent / Harness | Model Engine | Specialization | Role in Pipeline |
 |---|---|---|---|
 | **Orchestration Hub** | **Google Antigravity (AGY)** | Agent Lifecycle & Workspace Memory | Task Coordinator & State Machine |
 | **Execution Worker** | **OpenAI Codex CLI** | `gpt-6.2-sol` (reasoning: `max`) | Research (`--search`), Code Generation, Self-Review |
-| **Chief Architect & Auditor**| **Gemini 4 Argon** | `gemini-4-argon` / Antigravity Pro | Task Scripting (`task_script.md`), Strict Proposal Audit Gate |
+| **Chief Architect & Auditor** | **Gemini 4 Argon** | `gemini-4-argon` / Antigravity Pro | Task Scripting (`task_script.md`), Strict Proposal Audit Gate |
 | **Ledger Master & Scribe** | **Gemini 3.8 Flash** | `gemini-3.8-flash` / Antigravity Flash | JSONL Event Parsing, Structured Ledger (`ledger.json`), Docs |
-| **Multimedia Director & TTS**| **Gemini 3.8 Flash + TTS** | `gemini-3.8-flash-tts` (24kHz WAV) | Visual Storyboarding, Multi-Speaker Voiceover (`Kore`/`Puck`) |
+| **Multimedia Director & TTS** | **Gemini 3.8 Flash + TTS** | `gemini-3.8-flash-tts` (24kHz WAV) | Visual Storyboarding, Multi-Speaker Voiceover (`Kore`/`Puck`) |
 
 ---
 
-## 🏗️ Architecture & Flow / 架构流程
+## 🏗️ Architecture & Flow
 
 ```mermaid
 sequenceDiagram
@@ -103,7 +108,7 @@ To prevent calling the wrong harness or writing outside the workspace, Antigravi
 
 ## 📊 Live Visual Dashboard (Generative UI)
 
-The playbook includes a standalone and embedded HTML5 dashboard ([dashboard/harness_dashboard.html](dashboard/harness_dashboard.html)) providing Swarm-like live state monitoring:
+The playbook includes a standalone interactive HTML5 dashboard ([dashboard/harness_dashboard.html](dashboard/harness_dashboard.html)) with built-in **EN / 中文 live language switching**, providing Swarm-like live state monitoring:
 
 - Node Status Badges: `PENDING`, `RUNNING`, `APPROVED`, `REVISE_REQUIRED`.
 - Exact CLI parameters, sandbox policies, and verified paths.
@@ -111,7 +116,7 @@ The playbook includes a standalone and embedded HTML5 dashboard ([dashboard/harn
 
 ---
 
-## 🚀 Quick Start / 快速上手
+## 🚀 Quick Start
 
 ### 1. Installation in Antigravity
 
@@ -138,16 +143,16 @@ Simply instruct Antigravity in your conversation:
 
 ```markdown
 # Standard execution (Defaults to gpt-6.2-sol max)
-"按 codex 协同 playbook 帮我实现分布式重试组件，并输出完整台账。"
+"Run the codex-gemini playbook to implement a distributed retry client and output the full ledger."
 
 # High-Safety step-by-step mode
-"按 codex playbook 执行此重构，开启单步确认闸门 (step_by_step_gate)。"
+"Run the codex playbook with step_by_step_gate enabled."
 
 # Architecture only (No code execution)
-"使用 codex playbook 评估架构，只执行到阶段三（方案审核），不需要写代码。"
+"Use the codex playbook to evaluate the architecture up to Phase 3 (Proposal Audit) only."
 
 # With multimedia presentation
-"按 codex playbook 执行此任务，并开启多媒体管线生成语音解说。"
+"Run the codex playbook and enable the multimedia pipeline to generate a narrated voiceover."
 ```
 
 ---
@@ -189,15 +194,17 @@ antigravity-codex-orchestrator/
 ├── playbooks/
 │   └── codex_gemini_collaboration_playbook.md  # Standalone Markdown Playbook
 ├── schemas/
-│   └── ledger_schema.json       # JSON Schema for Task Ledger (台账契约)
+│   └── ledger_schema.json       # JSON Schema for Task Ledger
 ├── templates/
 │   └── script_template.md       # Argon Medium Task Script Template
 ├── scripts/
 │   └── orchestrator.py          # Reference Python Runner (Non-blocking CLI)
 ├── dashboard/
-│   └── harness_dashboard.html   # Generative UI Live Dashboard
+│   └── harness_dashboard.html   # Generative UI Live Dashboard (EN/中文)
 ├── LICENSE                      # Apache 2.0
-└── README.md
+├── CONTRIBUTING.md
+├── README.md                    # English Documentation
+└── README.zh-CN.md              # 简体中文文档
 ```
 
 ---
