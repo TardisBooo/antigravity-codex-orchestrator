@@ -6,28 +6,37 @@
   <title>Playbook 协同工程与单纯 Codex CLI 横向评测 — Off-Policy 风格交互报告</title>
   <style>
     :root {
-      --paper: #FFFFFF;
-      --surface: #FFFFFF;
-      --diagram: #FAFAF8;
-      --sunk: #F4F4F4;
-      --callout: #F1F0EC;
-      --row-active: #ECEBE6;
-      --ink: #111111;
-      --prose: #1D1D1D;
-      --text2: #3B3B3B;
-      --muted: #737373;
-      --faint: #9A9AA2;
-      --line: rgba(17, 17, 17, 0.13);
-      --line-strong: rgba(17, 17, 17, 0.24);
-      --signal: #E52228;
-      --blue: #2563EB;
-      --accent: #C2410C;
-      --pass: #15803D;
+      /* Surfaces (mrcl.st Dark Precision Tokens) */
+      --paper: #0d0d0f;
+      --surface: #16161a;
+      --diagram: #121215;
+      --sunk: #08080a;
+      --callout: #16161a;
+      --row-active: #1f1f26;
+
+      /* Typography & Text Hierarchy */
+      --ink: #f4f2ed;
+      --prose: #e4e2dd;
+      --text2: #a3a39e;
+      --muted: #8a8a85;
+      --faint: #6c6c68;
+
+      /* Hairline Structural Rules & Dividers */
+      --line: #2a2a31;
+      --line-strong: #3a3a43;
+
+      /* Accent & Brand Colors */
+      --signal: #ffc329;       /* mrcl.st signature warm gold accent */
+      --blue: #ffc329;         /* replace blue links with warm gold highlight */
+      --accent: #ffc329;
+      --pass: #34d399;         /* refined emerald green for pass states */
+      --on-accent: #12100f;
+
       --measure: 760px;
       --wide: 1080px;
       --margin: 64px;
-      --sans: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
-      --code: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      --code: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -118,7 +127,7 @@
     a {
       color: inherit;
       text-decoration: underline;
-      text-decoration-color: rgba(17, 17, 17, 0.35);
+      text-decoration-color: rgba(244, 242, 237, 0.3);
       text-underline-offset: 3px;
       transition: color 0.15s, text-decoration-color 0.15s;
     }
@@ -168,16 +177,9 @@
       line-height: 1;
     }
     .wordmark-text {
-      background: repeating-linear-gradient(
-        0deg,
-        var(--ink) 0px,
-        var(--ink) 2px,
-        rgba(17, 17, 17, 0.72) 2px,
-        rgba(17, 17, 17, 0.72) 3px
-      );
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+      color: var(--ink);
+      font-weight: 700;
+      letter-spacing: -0.03em;
     }
     .wordmark-dot {
       display: inline-block;
@@ -299,7 +301,7 @@
       position: sticky;
       top: 0;
       z-index: 30;
-      background: rgba(255, 255, 255, 0.96);
+      background: rgba(13, 13, 15, 0.88);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--line);
     }
@@ -357,7 +359,7 @@
       letter-spacing: -0.025em;
       margin: 2.75rem 0 1rem;
       padding-top: 1.5rem;
-      border-top: 1px solid rgba(17, 17, 17, 0.18);
+      border-top: 1px solid var(--line);
     }
     .prose h2.first-h2 {
       margin-top: 0.5rem;
@@ -621,7 +623,7 @@
       width: 36px;
       height: 26px;
       margin: 0 auto;
-      border: 1px solid rgba(17, 17, 17, 0.08);
+      border: 1px solid var(--line);
       display: grid;
       place-items: center;
       font-family: var(--code);
@@ -635,7 +637,7 @@
     }
     .hm-cell.na {
       background: transparent !important;
-      border: 1px dashed rgba(17, 17, 17, 0.25);
+      border: 1px dashed var(--line-strong);
       color: var(--faint);
     }
     .hm-table td.hm-label {
@@ -730,7 +732,7 @@
     .pb-stat strong { font-family: var(--code); font-size: 0.95rem; color: var(--ink); }
     .pb-bar {
       height: 8px;
-      background: #E5E5E0;
+      background: #23232b;
       display: flex;
       overflow: hidden;
       margin-bottom: 0.5rem;
@@ -936,7 +938,7 @@
 
     /* Native Lightbox Modal (Modern Web Guidance: dialog + light-dismiss-a-dialog) */
     dialog#img-dialog {
-      border: 1px solid var(--ink);
+      border: 1px solid var(--line-strong);
       padding: 0;
       background: var(--paper);
       max-width: min(94vw, 1280px);
@@ -947,7 +949,7 @@
       overscroll-behavior: contain;
     }
     dialog#img-dialog::backdrop {
-      background: rgba(17, 17, 17, 0.72);
+      background: rgba(5, 5, 7, 0.85);
       backdrop-filter: blur(2px);
       overflow: hidden;
       overscroll-behavior: contain;
@@ -1008,11 +1010,7 @@
     <a class="wordmark" href="#top" aria-label="orchestrator evaluation">
       <span class="wordmark-text">orchestrator eval</span><span class="wordmark-dot"></span>
     </a>
-    <nav class="top-links" aria-label="Quick section links">
-      <a href="#article" onclick="selectTab('article')">article</a>
-      <a href="#methods" onclick="selectTab('methods')">methods</a>
-      <a href="#traces" onclick="selectTab('traces')">traces</a>
-    </nav>
+    
   </header>
 
   <div class="col" id="top">
@@ -1041,13 +1039,13 @@
         <svg width="96" height="96" viewBox="0 0 96 96">
           <defs>
             <pattern id="scanlines" width="96" height="4" patternUnits="userSpaceOnUse">
-              <rect width="96" height="2" fill="#111111"/>
+              <rect width="96" height="2" fill="#f4f2ed"/>
               <rect y="2" width="96" height="2" fill="transparent"/>
             </pattern>
           </defs>
           <rect x="6" y="6" width="84" height="84" fill="none" stroke="rgba(17,17,17,0.16)" stroke-width="1"/>
           <circle cx="48" cy="36" r="14" fill="url(#scanlines)"/>
-          <path d="M22 78 C24 56, 36 52, 48 52 C60 52, 72 56, 74 78" fill="none" stroke="#111111" stroke-width="3"/>
+          <path d="M22 78 C24 56, 36 52, 48 52 C60 52, 72 56, 74 78" fill="none" stroke="#f4f2ed" stroke-width="3"/>
           <path d="M10 34 Q48 14 86 34" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="3 3"/>
           <path d="M10 58 Q48 42 86 58" fill="none" stroke="#E52228" stroke-width="1.5"/>
           <rect x="77" y="13" width="6" height="6" fill="#E52228"/>
@@ -1310,7 +1308,7 @@
       <div class="col prose">
         <h2>五、跨维度关联散点：效率、速度、深度与治理的权衡</h2>
         <p>
-          为了看清同一运行模式在不同维度之间是否存在“此消彼长”，我们在下图把 4 个关键工程维度并列成一组联动散点图。将鼠标悬停在任意圆点上，<strong>同一执行模式在所有 4 列中的位置会同步亮起红色（<code>#E52228</code>）</strong>，直观揭示其综合画像。
+          为了看清同一运行模式在不同维度之间是否存在“此消彼长”，我们在下图把 4 个关键工程维度并列成一组联动散点图。将鼠标悬停在任意圆点上，<strong>同一执行模式在所有 4 列中的位置会同步亮起高对比度金黄高亮（<code>#ffc329</code>）</strong>，直观揭示其综合画像。
         </p>
       </div>
 
@@ -1783,13 +1781,13 @@ codex login</pre>
         const r = Math.round(240 - t * (240 - 37));
         const g = Math.round(245 - t * (245 - 99));
         const b = Math.round(255 - t * (255 - 235));
-        return { bg: `rgb(${r},${g},${b})`, color: t > 0.65 ? "#FFFFFF" : "#111111", text: `+${val.toFixed(1)}` };
+        return { bg: `rgb(${r},${g},${b})`, color: t > 0.65 ? "#FFFFFF" : "#0d0d0f", text: `+${val.toFixed(1)}` };
       } else {
         const t = Math.min(1, Math.abs(val) / 2.0);
         const r = Math.round(254 - t * (254 - 220));
         const g = Math.round(240 - t * (240 - 38));
         const b = Math.round(240 - t * (240 - 38));
-        return { bg: `rgb(${r},${g},${b})`, color: t > 0.65 ? "#FFFFFF" : "#111111", text: val.toFixed(1) };
+        return { bg: `rgb(${r},${g},${b})`, color: t > 0.65 ? "#FFFFFF" : "#0d0d0f", text: val.toFixed(1) };
       }
     }
 
@@ -1890,8 +1888,8 @@ codex login</pre>
           <text x="54" y="49" font-size="10" fill="#2563EB" text-anchor="middle">UI: Cd=0.38</text>
           <rect x="108" y="30" width="76" height="32" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="3 2"/>
           <text x="146" y="49" font-size="10" fill="#C2410C" text-anchor="middle">mesh.name=""</text>
-          <path d="M54 62 L54 88 L146 88 L146 62" fill="none" stroke="#111111" stroke-width="1.5"/>
-          <text x="100" y="110" font-size="10" fill="#111111" text-anchor="middle">需端到端浏览器冒烟测试捕获</text>
+          <path d="M54 62 L54 88 L146 88 L146 62" fill="none" stroke="#f4f2ed" stroke-width="1.5"/>
+          <text x="100" y="110" font-size="10" fill="#f4f2ed" text-anchor="middle">需端到端浏览器冒烟测试捕获</text>
         `;
       } else if (type === "flow") {
         svg.innerHTML = `
@@ -1899,7 +1897,7 @@ codex login</pre>
           <path d="M14 40 Q90 36 115 26 Q145 36 186 42" fill="none" stroke="#2563EB" stroke-width="2"/>
           <path d="M14 68 Q75 68 85 52" fill="none" stroke="#C2410C" stroke-width="2"/>
           <path d="M14 96 Q90 100 115 110 Q145 100 186 94" fill="none" stroke="#2563EB" stroke-width="2"/>
-          <rect x="92" y="48" width="16" height="40" fill="#111111"/>
+          <rect x="92" y="48" width="16" height="40" fill="#f4f2ed"/>
           <path d="M118 68 C132 54, 146 82, 162 66 C172 58, 180 72, 186 68" fill="none" stroke="#E52228" stroke-width="1.8"/>
           <text x="150" y="122" font-size="8" fill="#E52228" text-anchor="middle">Wake Vortex &amp; Color Map</text>
         `;
@@ -1964,16 +1962,16 @@ codex login</pre>
       // Y ticks
       [0, 50, 100].forEach(v => {
         const y = botY - (v / 100) * (botY - topY);
-        out += `<line x1="${padL - 10}" y1="${y}" x2="925" y2="${y}" stroke="rgba(17,17,17,0.08)" stroke-dasharray="3 3"/>`;
+        out += `<line x1="${padL - 10}" y1="${y}" x2="925" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3 3"/>`;
         out += `<text x="${padL - 18}" y="${y + 4}" font-size="10" fill="#9A9AA2" text-anchor="end">${v}</text>`;
       });
 
       DOT_CATS.forEach((cat, ci) => {
         const cx = padL + ci * colW + colW * 0.5;
-        out += `<text x="${cx}" y="34" font-size="12" font-weight="600" fill="#111111" text-anchor="middle">${cat}</text>`;
+        out += `<text x="${cx}" y="34" font-size="12" font-weight="600" fill="#f4f2ed" text-anchor="middle">${cat}</text>`;
         const mean = DOT_RUNS.reduce((s, r) => s + r.vals[ci], 0) / DOT_RUNS.length;
         const my = botY - (mean / 100) * (botY - topY);
-        out += `<line x1="${cx - 42}" y1="${my}" x2="${cx + 42}" y2="${my}" stroke="#111111" stroke-width="1.5"/>`;
+        out += `<line x1="${cx - 42}" y1="${my}" x2="${cx + 42}" y2="${my}" stroke="#f4f2ed" stroke-width="1.5"/>`;
 
         DOT_RUNS.forEach((run, ri) => {
           const jitter = (ri - 1.5) * 14;
@@ -1987,7 +1985,7 @@ codex login</pre>
       // Legend bottom
       DOT_RUNS.forEach((run, ri) => {
         const lx = 70 + ri * 215;
-        out += `<circle cx="${lx}" cy="256" r="4" fill="${run.color}"/><text x="${lx + 9}" y="260" font-size="11" fill="#3B3B3B">${run.name}</text>`;
+        out += `<circle cx="${lx}" cy="256" r="4" fill="${run.color}"/><text x="${lx + 9}" y="260" font-size="11" fill="#a3a39e">${run.name}</text>`;
       });
 
       svg.innerHTML = out;
@@ -2106,30 +2104,30 @@ codex login</pre>
         const cCache = Math.round(130176 * scale);
         const cOut = Math.round(6180 * scale);
         svg.innerHTML = `
-          <rect x="200" y="10" width="12" height="12" fill="#1D4ED8"/><text x="217" y="20" font-size="11" fill="#3B3B3B">Uncached Input</text>
-          <rect x="330" y="10" width="12" height="12" fill="#93C5FD"/><text x="347" y="20" font-size="11" fill="#3B3B3B">Cached Input (上下文缓存/重传)</text>
-          <rect x="560" y="10" width="12" height="12" fill="#15803D"/><text x="577" y="20" font-size="11" fill="#3B3B3B">Output (代码与文本产出)</text>
+          <rect x="200" y="10" width="12" height="12" fill="#1D4ED8"/><text x="217" y="20" font-size="11" fill="#a3a39e">Uncached Input</text>
+          <rect x="330" y="10" width="12" height="12" fill="#1e3a8a"/><text x="347" y="20" font-size="11" fill="#a3a39e">Cached Input (上下文缓存/重传)</text>
+          <rect x="560" y="10" width="12" height="12" fill="#15803D"/><text x="577" y="20" font-size="11" fill="#a3a39e">Output (代码与文本产出)</text>
 
-          <line x1="200" y1="38" x2="200" y2="195" stroke="rgba(17,17,17,0.2)"/>
-          <line x1="416" y1="38" x2="416" y2="195" stroke="rgba(17,17,17,0.08)" stroke-dasharray="3 3"/>
-          <line x1="633" y1="38" x2="633" y2="195" stroke="rgba(17,17,17,0.08)" stroke-dasharray="3 3"/>
-          <line x1="850" y1="38" x2="850" y2="195" stroke="rgba(17,17,17,0.08)" stroke-dasharray="3 3"/>
+          <line x1="200" y1="38" x2="200" y2="195" stroke="rgba(255,255,255,0.18)"/>
+          <line x1="416" y1="38" x2="416" y2="195" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3 3"/>
+          <line x1="633" y1="38" x2="633" y2="195" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3 3"/>
+          <line x1="850" y1="38" x2="850" y2="195" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3 3"/>
           <text x="200" y="216" font-size="11" fill="#737373" text-anchor="middle">0</text>
           <text x="416" y="216" font-size="11" fill="#737373" text-anchor="middle">55k</text>
           <text x="633" y="216" font-size="11" fill="#737373" text-anchor="middle">110k</text>
           <text x="850" y="216" font-size="11" fill="#737373" text-anchor="middle">165k</text>
 
-          <text x="188" y="76" font-size="12" font-weight="600" fill="#111111" text-anchor="end">Playbook 5 阶段</text>
+          <text x="188" y="76" font-size="12" font-weight="600" fill="#f4f2ed" text-anchor="end">Playbook 5 阶段</text>
           <text x="188" y="92" font-size="10" fill="#737373" text-anchor="end">Argon+Worker+Flash</text>
           <rect x="200" y="60" width="${pUnc}" height="34" fill="#1D4ED8"/>
-          <rect x="${200+pUnc}" y="60" width="${pCache}" height="34" fill="#93C5FD"/>
+          <rect x="${200+pUnc}" y="60" width="${pCache}" height="34" fill="#1e3a8a"/>
           <rect x="${200+pUnc+pCache}" y="60" width="${pOut}" height="34" fill="#15803D"/>
           <text x="${210+pUnc+pCache+pOut}" y="82" font-size="12" font-weight="600" fill="#15803D">19,070 Tokens (6,058 In + 8,192 Cached + 4,820 Out)</text>
 
           <text x="188" y="146" font-size="12" font-weight="600" fill="#E52228" text-anchor="end">Codex CLI 实测</text>
           <text x="188" y="162" font-size="10" fill="#737373" text-anchor="end">gpt-5.6-sol (low)</text>
-          <rect x="200" y="130" width="${cUnc}" height="34" fill="#B91C1C"/>
-          <rect x="${200+cUnc}" y="130" width="${cCache}" height="34" fill="#FCA5A5"/>
+          <rect x="200" y="130" width="${cUnc}" height="34" fill="#dc2626"/>
+          <rect x="${200+cUnc}" y="130" width="${cCache}" height="34" fill="#7f1d1d"/>
           <rect x="${200+cUnc+cCache}" y="130" width="${cOut}" height="34" fill="#15803D"/>
           <text x="845" y="182" font-size="11" font-weight="600" fill="#E52228" text-anchor="end">163,387 Tokens (157,207 Input 占 96.2% / 仅 6,180 Output)</text>
         `;
@@ -2148,10 +2146,10 @@ codex login</pre>
           const y = 34 + i * 33;
           const wIn = Math.round((t.inT / maxPerTurn) * 520);
           const wOut = Math.max(2, Math.round((t.outT / maxPerTurn) * 520));
-          out += `<text x="180" y="${y + 15}" font-size="11" fill="#1D1D1D" text-anchor="end">${t.lbl}</text>`;
-          out += `<rect x="190" y="${y}" width="${wIn}" height="21" fill="#FCA5A5" stroke="#E52228" stroke-width="0.5"/>`;
+          out += `<text x="180" y="${y + 15}" font-size="11" fill="#e4e2dd" text-anchor="end">${t.lbl}</text>`;
+          out += `<rect x="190" y="${y}" width="${wIn}" height="21" fill="#7f1d1d" stroke="#E52228" stroke-width="0.5"/>`;
           out += `<rect x="${190 + wIn}" y="${y}" width="${wOut}" height="21" fill="#15803D"/>`;
-          out += `<text x="${198 + wIn + wOut}" y="${y + 15}" font-size="11" fill="#3B3B3B">${(t.inT + t.outT).toLocaleString()} (累计 ${t.cum.toLocaleString()})</text>`;
+          out += `<text x="${198 + wIn + wOut}" y="${y + 15}" font-size="11" fill="#a3a39e">${(t.inT + t.outT).toLocaleString()} (累计 ${t.cum.toLocaleString()})</text>`;
         });
         svg.innerHTML = out;
       }
