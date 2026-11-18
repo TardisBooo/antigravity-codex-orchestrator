@@ -1,126 +1,154 @@
-# Codex 与多模型协同作业 Playbook (独立执行手册)
-> **版本**: 1.2.0 (默认锁定 Codex 6.2 sol max)  
-> **定位**: 模块化、声明式、完全可视化的跨模型协作剧本  
-> **适用环境**: Google Antigravity + OpenAI Codex CLI + Gemini 4 / 3.8 / TTS  
+---
+name: playbook-codex-gemini
+description: >-
+  Modular, opt-in engineering playbook orchestrating Codex CLI (search, code, self-review),
+  Gemini 4 Hydrogen API via key.txt (task scripting, audit gate, ledger/docs, director), and Gemini TTS.
+  Local Antigravity acts strictly as a lightweight orchestrator/dispatcher, offloading all generation and review to Codex and APIs.
+  Features Swarm-like visual pipeline dashboards and strict pre-flight harness verification gates.
+  Codex defaults to gpt-6.2-sol with reasoning effort max.
+  Activate when the user asks to execute, follow, customize, or trigger the Codex collaborative playbook or multi-agent workflow.
+---
+
+# Codex 与 Gemini 4 Hydrogen 协同分发 Playbook (Codex & Hydrogen Multi-Agent Playbook)
+
+这是一个**模块化、全外包分发、零本地重型开销、全流程可视化**的工程与多媒体协同剧本（Playbook）。
+
+### 核心分工与设计原则：
+1. **本地 Antigravity 仅作调度中枢 (Pure Orchestrator & Dispatcher)**:
+   本地默认模型**不承担实质性的复杂方案构思、代码编写或审计推演**，纯粹负责维护任务流水线状态机、执行起飞前校验卡（Pre-Flight Inspection）、安全派发外部子进程与 API 调用、以及展示全局态势看板。
+2. **所有重型工作全部外部化分发**:
+   - **OpenAI Codex CLI** (`gpt-6.2-sol max`): 承担全网检索、方案初稿编制、代码落地与本地内部代码自审 (`codex review`)。
+   - **Gemini 4 Hydrogen API** (经 `key.txt` 直连): 承担阶段一（台本编制与架构契约）、阶段三（方案深度审核闸门）、阶段五（台账记账与交付文档）、阶段六（多媒体视觉分镜与导演时序切片）。
+   - **Gemini TTS** (`gemini-3.8-flash-tts`): 承担拟真语音合成。
 
 ---
 
-## 🎯 核心设计哲学
-1. **零入侵性 (Zero Intrusion)**: 不修改 Antigravity 底层任何一行核心引擎代码，不写死固定的黑盒脚本，纯粹依托 Antigravity 的原生能力（提示词、任务流、子智能体与 CLI 终端调度）。
-2. **顶配推理驱动**: 默认锁定 Codex 使用 **`gpt-6.2-sol`** 并开启 **`reasoning_effort: max`**，兼顾高维编程推理与代码自审能力。
-3. **全流程可视化 (Full Process Visualization)**: 像 Swarm 一样提供全局态势看板，节点状态（已完成/进行中/打回/待触发）、调用耗时与 Token 开销一目了然。
-4. **严格防错与 Harness 校验 (Anti-Drift Harness Gate)**: 在调用每一个底层工具/模型（Harness）前，强制输出《起飞前预检卡 (Pre-flight Inspection Card)》，包含具体命令行、权限沙箱与绑定模型，杜绝调错工具或误改文件。
-5. **支持单步确认模式 (Interactive Step-by-Step)**: 用户可随时开启单步放行，每一步执行前由你确认后再动，零脱缰风险。
+## 0. 剧本配置字典与防错开关 (Playbook Config Matrix)
 
----
+```yaml
+playbook_config:
+  # Codex 模型与推理配置 (默认 6.2 sol max，可随时在对话中自选)
+  codex_model: "gpt-6.2-sol"       # 默认模型: gpt-6.2-sol
+  codex_reasoning_effort: "max"    # 默认推理强度: max
 
-## ⚙️ 剧本运行开关 (Workflow Feature Flags)
+  # 外部 API 引擎配置 (阶段一、三、五、六导演全量采用 key.txt 的 Hydrogen API)
+  api_engine: "gemini-4-hydrogen"
+  hydrogen_key_file: "E:\\Workspaces\\key.txt"   # 可用环境变量 PLAYBOOK_KEY_FILE 覆盖
+  hydrogen_key_label: "Gemini 4 Hydrogen"       # key.txt 中该 key 上方的标识行
 
-在触发此 Playbook 时，你可以根据任务需要开启或关闭任意模块：
+  # 可视化与防错闸门
+  enable_visual_dashboard: true   # 是否渲染类似 Swarm 的态势感知看板大屏
+  step_by_step_gate: false        # 是否开启单步确认 (每步调用 Harness 前亮出校验卡等用户放行)
 
-| 开关参数 | 默认值 | 作用说明 |
-|---|---|---|
-| `codex_model` | **`"gpt-6.2-sol"`** | **Codex 默认执行模型** |
-| `codex_reasoning_effort` | **`"max"`** | **Codex 深度推理强度** |
-| `enable_visual_dashboard` | `true` | 是否实时渲染类似 Swarm 的可视化流程看板大屏 |
-| `step_by_step_gate` | `false` | 是否开启单步人工确认闸门 (每步前亮出 Harness 校验卡等用户放行) |
-| `enable_codex_search` | `true` | 是否调用 Codex 进行全网/项目代码资料搜集 |
-| `enable_argon_audit` | `true` | 是否让 Argon Medium 对 Codex 方案进行严格边界与安全性深度审核 |
-| `enable_codex_review` | `true` | 是否在代码编写后触发 Codex 内部自审 (`codex review --uncommitted`) |
-| `enable_flash_ledger` | `true` | 是否由 Gemini 4 Hydrogen (key 文件 API) 生成机器可读台账 (`ledger.json`) 与总结 |
-| `enable_multimedia` | `false` | 是否激活多媒体视听制作（分镜导演 + Gemini TTS 语音生成） |
-| `hydrogen_model` | `"gemini-4-hydrogen"` | 阶段五台账/文档引擎 |
-| `hydrogen_key_file` | `"E:\\Workspaces\\key.txt"` | Hydrogen key 所在文件，可用环境变量 `PLAYBOOK_KEY_FILE` 覆盖 |
-| `max_audit_retries` | `2` | 审核不通过时的最大修改重试轮次 |
+  # 阶段开关 (全流程可自由裁切)
+  enable_codex_search: true       # 阶段二: 是否让 Codex 执行外部/项目材料检索
+  enable_hydrogen_audit: true     # 阶段三: 是否启用 Hydrogen 深度方案审核闸门
+  enable_codex_review: true       # 阶段四: 是否让 Codex 执行自身 review
+  enable_ledger_docs: true        # 阶段五: 是否由 Hydrogen 生成任务台账与技术文档
+  enable_multimedia: false        # 阶段六: 是否激活多媒体视听制作 (默认关闭，按需开启)
+
+  # 运行参数
+  max_audit_retries: 2            # 方案审核未通过时的最大修改轮次
+  sandbox_mode: "workspace-write" # Codex 运行沙箱模式
+  tts_primary_voice: "Kore"       # 默认配音员 (Kore / Puck / Fenrir / Aoede)
+```
 
 ---
 
 ## 🛡️ 防错机制：起飞前 Harness 校验卡 (Pre-Flight Inspection Card)
 
-为了防止“调用错 Harness”、“在错误目录下写入”或“参数配置漂移”，在执行任何涉及文件写入或外部模型调用的关键节点前，Antigravity 必须先在会话中亮出如下格式的校验卡：
+在执行任何关键节点（调起 Codex CLI、调用外部 Hydrogen API、或运行写权限命令）前，Antigravity 必须先输出校验卡，确保调用的 Harness、路径与参数 100% 正确：
 
 ```text
 ┌─────────────────────────── [Harness Pre-Flight Verification] ───────────────────────────┐
 │ 阶段编号: 阶段四 (代码实现)                                                               │
 │ 目标 Harness: OpenAI Codex CLI (v0.156.0)                                               │
 │ 模型绑定:     gpt-6.2-sol (Reasoning Effort: max)                                        │
-│ 沙箱隔离模式: workspace-write (写入范围严格限制在: D:/my_project)                         │
+│ 沙箱隔离模式: workspace-write (写入范围严格限制在: <TARGET_DIR>)                           │
 │ 标准输入控制: Closed (stdin=DEVNULL 避免 Windows 终端死锁挂起)                            │
 │ 触发完整指令: "" | codex exec -m gpt-6.2-sol -c model_reasoning_effort="max" ...         │
-│ 输入产物依赖: task_script.md, proposal.md (Argon Audit: APPROVED)                        │
+│ 输入产物依赖: task_script.md, proposal.md (Hydrogen Audit: APPROVED)                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-> **若开启了 `step_by_step_gate: true`**：Antigravity 会在亮出此卡后暂停，输出：  
-> `“以上 Harness 与命令校验无误，是否继续执行？[Y/n]”`，等待你下达指令后再触发。
+若 `step_by_step_gate: true`，Antigravity 将在此处暂停等待用户确认（`Proceed [Y/n]`），用户可直接纠偏。
 
 ---
 
-## 📋 分阶段执行手册 (Phase-by-Phase Directives)
-
-### 阶段一：台本编制 (Scripting Phase)
-- **负责角色**: **Argon Medium** (Gemini 4 Argon / 首席架构师)
-- **Harness 校验**: 采用只读上下文分析，禁止修改任何本地源码。
-- **任务目标**: 将用户的高层目标转化为严密契约《执行台本》。
-- **产出物**: `task_script.md`
-
----
-
-### 阶段二：资料搜集与方案提报 (Research & Proposal Phase)
-- **负责角色**: **Codex CLI** (`gpt-6.2-sol`, `effort: max`)
-- **Harness 校验**: 
-  - 沙箱参数: `-s read-only`（严禁在此阶段写入工程代码）
-  - 网络参数: `--search`（允许实时网页搜索）
-- **执行命令**:
+## 阶段一：台本编制与架构契约 (Scripting Phase - Hydrogen API)
+- **负责角色**: 外部 API (`gemini-4-hydrogen`，经 `key.txt` 调度)
+- **执行逻辑**: 本地 Antigravity 仅将用户诉求打包为输入文件，直接派发给 Hydrogen API：
   ```powershell
-  "" | codex exec -m gpt-6.2-sol -c model_reasoning_effort="max" --search --skip-git-repo-check -s read-only -o proposal.md "根据 task_script.md 检索相关实现并输出技术方案"
+  python scripts/hydrogen_call.py --prompt-file "user_goal.md" --out "task_script.md" --system "你是顶尖架构师，负责分析需求并制定工程边界契约与Codex执行指令"
   ```
-- **产出物**: `proposal.md`
+- **输出**: `task_script.md`（定义架构边界、Codex 执行指令、测试验收指标）。
 
 ---
 
-### 阶段三：方案深度审核闸门 (Audit Gate Phase)
-- **负责角色**: **Argon Medium** (Gemini 4 Argon / 审查专家)
-- **任务目标**: 阻止设计缺陷与安全隐患流入编码环节。
-- **决策分支**:
-  - `APPROVED` $\rightarrow$ 准许进入阶段四。
-  - `REVISE_REQUIRED` $\rightarrow$ 提炼修改意见反馈给 Codex 修订，重试计数 $+1$（最多 2 次）。
-
----
-
-### 阶段四：代码实现与内部自审 (Coding & Review Phase)
-- **负责角色**: **Codex CLI** (`gpt-6.2-sol`, `effort: max`)
+## 阶段二：材料搜集与方案提报 (Research & Proposal Phase - Codex CLI)
+- **负责角色**: 本地 Codex CLI (`gpt-6.2-sol`, reasoning effort: `max`)
 - **执行命令**:
   ```powershell
-  # 1. 编写与修改代码
-  "" | codex exec -m gpt-6.2-sol -c model_reasoning_effort="max" --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox --json -C "<WORK_DIR>" "根据审核通过的方案编写代码并运行测试"
-  
-  # 2. 内部自审查
+  "" | codex exec -m gpt-6.2-sol -c model_reasoning_effort="max" --search --skip-git-repo-check -s read-only -o proposal.md "根据 task_script.md 检索技术选型与实现思路"
+  ```
+- **输出**: `proposal.md`。
+
+---
+
+## 阶段三：方案深度审核闸门 (Proposal Audit Phase - Hydrogen API)
+- **负责角色**: 外部 API (`gemini-4-hydrogen`，经 `key.txt` 调度)
+- **执行逻辑**: 本地 Antigravity 将 `task_script.md` 与 Codex 的 `proposal.md` 发送给 Hydrogen API 执行零缺陷边界审查：
+  ```powershell
+  python scripts/hydrogen_call.py --prompt-file "audit_input.md" --out "audit_report.md" --system "你是极其严格的架构审查专家，严格检查封装性、安全隐患与复杂度，给出判定结论 APPROVED 或 REVISE_REQUIRED"
+  ```
+- **决策分支**: `APPROVED` 准入下一阶段；`REVISE_REQUIRED` 打回修订（最多 2 次）。
+
+---
+
+## 阶段四：代码实现与内部评审 (Implementation Phase - Codex CLI)
+- **负责角色**: 本地 Codex CLI (`gpt-6.2-sol`, reasoning effort: `max`)
+- **执行命令**:
+  ```powershell
+  "" | codex exec -m gpt-6.2-sol -c model_reasoning_effort="max" --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox --json -C "<WORK_DIR>" "编写代码并运行测试"
   "" | codex review --uncommitted
   ```
-- **产出物**: 源码文件、Git Diff、自查意见、JSONL 事件流。
+- **输出**: 源代码、Git Diff、自查意见、JSONL 事件流。
 
 ---
 
-### 阶段五：台账记账与技术文档 (Ledger & Scribing Phase)
-- **负责角色**: **Gemini 4 Hydrogen**（`gemini-4-hydrogen`，通过 `key.txt` 里的 API 真实调用，不由主会话模型代演）
-- **执行前必做（可用性自检）**: 每次进入本阶段先自检，未通过则停下报告，不得改由主会话代写。
+## 阶段五：台账记账与文档撰写 (Ledger & Scribing Phase - Hydrogen API)
+- **负责角色**: 外部 API (`gemini-4-hydrogen`，经 `key.txt` 调度)
+- **执行前必做**: 运行自检，验证 API 可用性：
   ```powershell
   python scripts/hydrogen_call.py --selftest
   ```
-  `503 high demand` 是瞬时错误，脚本内置退避重试，不算失败。
-- **执行逻辑**: 主会话把 Codex JSONL 用量、`git diff --stat`、审核结论整理成输入文件，再交给 Hydrogen：
+- **执行逻辑**: 本地 Antigravity 收集 Codex JSONL 日志与 Git Diff 整理为输入，派发给 Hydrogen API 生成规范文件：
   ```powershell
-  python scripts/hydrogen_call.py --prompt-file ledger_input.md --out ledger.json --system "只输出符合 ledger_schema.json 的 JSON"
+  python scripts/hydrogen_call.py --prompt-file ledger_input.md --out ledger.json --system "只输出符合 ledger_schema.json 规范的 JSON"
   python scripts/hydrogen_call.py --prompt-file summary_input.md --out SUMMARY.md
   ```
-- **Key 处理**: 只在调用时从 `hydrogen_key_file` 读取，经子进程环境变量传给 `gemini-api`。禁止回显、写日志、入库或粘贴进命令行。
-- **产出物**: `ledger.json` 与 `SUMMARY.md`。
+- **输出**: `ledger.json` (结构化数据) 与 `SUMMARY.md` (交付总结)。
+
 ---
 
-### 阶段六 (可选)：多媒体视听制作 (Multimedia Phase)
-- **负责角色**: **Gemini 3.8 Flash** (导演剪辑) + **Gemini TTS** (配音合成)
-- **执行命令**:
-  ```powershell
-  gemini-api tts -f dialogue.txt --multi-speaker "Alice=Kore,Bob=Puck" --out ./voiceover.wav
-  ```
+## 阶段六 (可选)：多媒体视听制作 (Multimedia Phase - Hydrogen API + TTS)
+- **负责角色**:
+  - **视觉导演与分镜切片**: 外部 API (`gemini-4-hydrogen`)
+    ```powershell
+    python scripts/hydrogen_call.py --prompt-file storyboard_input.md --out timeline.json --system "规划演示分镜时长、视效提示词与时间轴切片"
+    ```
+  - **语音合成**: 本地 `gemini-api tts` (24kHz WAV)
+    ```powershell
+    gemini-api tts -f dialogue.txt --multi-speaker "Alice=Kore,Bob=Puck" --out ./voiceover.wav
+    ```
+
+---
+
+## 7. 调用与互动示例
+
+1. **标准全分发执行**:
+   > “按 codex 协同 playbook 执行此任务。”
+2. **极度防错（开启单步人工确认闸门）**:
+   > “按 codex playbook 执行此任务，**开启单步确认闸门 (step_by_step_gate)**，每一步调用外部 harness 前先展示校验卡，等我放行后再跑。”
+3. **自选 Codex 运行模型**:
+   > “按 codex 协同 playbook 执行任务，Codex 指定使用 6.2 astra low。”

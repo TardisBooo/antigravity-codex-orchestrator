@@ -23,13 +23,34 @@
 
 | 智能体 / Harness | 底层模型引擎 | 能力专长 | 流水线中的核心职责 |
 |---|---|---|---|
-| **总控调度 (Hub)** | **Google Antigravity (AGY)** | 智能体生命周期与工作区记忆 | 任务协调中枢与全局状态机 |
-| **执行引擎 (Worker)** | **OpenAI Codex CLI** | `gpt-6.2-sol` (推理强度: `max`) | 资料检索 (`--search`)、代码编写重构、自我代码评审 (`codex review`) |
-| **首席架构师与审核** | **Gemini 4 Argon** | `gemini-4-argon` / Antigravity Pro | 编写任务台本 (`task_script.md`)、深度方案审核闸门 |
-| **台账管家与文书** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen`，经 key 文件调用 (`scripts/hydrogen_call.py`) | 解析 JSONL 事件流、生成结构化台账 (`ledger.json`) 与交接文档 |
-| **多媒体导演与配音** | **Gemini 3.8 Flash + TTS** | `gemini-3.8-flash-tts` (24kHz WAV) | 演示分镜剪辑规划、多角色拟真语音合成 (`Kore`/`Puck`) |
+| **总控调度 (Hub)** | **Google Antigravity (AGY)** | 轻量调度网关与状态机 | 纯粹编排调度、起飞前核验与人话转译（本地不承担繁重生成） |
+| **执行引擎 (Worker)** | **OpenAI Codex CLI** | `gpt-6.2-sol` (推理: `max`，会话可自选) | 资料检索 (`--search`)、代码编写重构、自我代码评审 (`codex review`) |
+| **架构台本与方案审核** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` (经 `key.txt` 直连) | 阶段一任务台本编制 (`task_script.md`) 与阶段三方案深度审核闸门 |
+| **台账管家与文书** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` (经 `key.txt` 直连) | 阶段五解析 JSONL、生成结构化台账 (`ledger.json`) 与技术总结 |
+| **视觉导演与语音合成** | **Hydrogen (API) + Gemini TTS** | `gemini-4-hydrogen` + `gemini-3.8-flash-tts` | 阶段六分镜切片规划 (`timeline.json`) 与 24kHz 拟真双角色配音合成 |
 
 ---
+
+
+---
+
+## ⚡ 两种版本剧本 (Two Playbook Flavors)
+
+本项目提供两种即插即用、完全声明式的协作剧本：
+
+### 1. `playbook-codex-gemini` (全外包协同流水线)
+- **本地零重型消耗**：Antigravity 仅负责流程状态机、起飞前核验卡与分发。
+- **全能力外部化**：
+  - **Codex CLI (`gpt-6.2-sol max`)**：搜料、编码、内部自审。
+  - **Gemini 4 Hydrogen API (经 `key.txt` 调度)**：阶段一台本编制、阶段三方案审核、阶段五台账与文档、阶段六分镜导演。
+  - **Gemini TTS**：24kHz 语音合成。
+- **适用场景**：复杂生产级工程重构、严格安全审核与多媒体汇报交付。
+
+### 2. `playbook-codex-direct` (直通转发与人话转译工作流)
+- **任务直发**：跳过繁杂多阶段闸门，Antigravity 组装提示词后直接驱动 Codex CLI 执行。
+- **模型自由**：会话中随时切换模型（如 `6.2 sol max`、`6.2 astra low`、`5.6 sol` 等），默认 `gpt-6.2-sol` (effort: `max`)。
+- **人话转译**：Codex 完成后，Antigravity 负责将晦涩的 Git Diff 与技术日志翻译为通俗直白的大白话（讲清改了哪、为什么改、如何验证），并输出 `SUMMARY.md`。
+- **适用场景**：日常敏捷开发、快速修 Bug、轻量脚本编写与低负担工作交接。
 
 ## 🏗️ 协同架构与时序流
 

@@ -25,13 +25,34 @@ Instead of locking developers into brittle, black-box scripts, this playbook lev
 
 | Agent / Harness | Model Engine | Specialization | Role in Pipeline |
 |---|---|---|---|
-| **Orchestration Hub** | **Google Antigravity (AGY)** | Agent Lifecycle & Workspace Memory | Task Coordinator & State Machine |
-| **Execution Worker** | **OpenAI Codex CLI** | `gpt-6.2-sol` (reasoning: `max`) | Research (`--search`), Code Generation, Self-Review |
-| **Chief Architect & Auditor** | **Gemini 4 Argon** | `gemini-4-argon` / Antigravity Pro | Task Scripting (`task_script.md`), Strict Proposal Audit Gate |
-| **Ledger Master & Scribe** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` via key file (`scripts/hydrogen_call.py`) | JSONL Event Parsing, Structured Ledger (`ledger.json`), Docs |
-| **Multimedia Director & TTS** | **Gemini 3.8 Flash + TTS** | `gemini-3.8-flash-tts` (24kHz WAV) | Visual Storyboarding, Multi-Speaker Voiceover (`Kore`/`Puck`) |
+| **Orchestration Hub** | **Google Antigravity (AGY)** | Lightweight Dispatcher & State Machine | Pure Orchestration, Pre-flight Verification, Translation (No heavy generation) |
+| **Execution Engine** | **OpenAI Codex CLI** | `gpt-6.2-sol` (reasoning: `max` / selectable) | Research (`--search`), Code Generation, Self-Review (`codex review`) |
+| **Architect & Auditor Gate** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` via `key.txt` | Phase 1 Task Scripting (`task_script.md`) & Phase 3 Proposal Audit Gate |
+| **Ledger Master & Scribe** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` via `key.txt` | Phase 5 Event Parsing, Structured Ledger (`ledger.json`) & Docs |
+| **Multimedia Director & TTS** | **Hydrogen (API) + Gemini TTS** | `gemini-4-hydrogen` + `gemini-3.8-flash-tts` | Phase 6 Visual Storyboarding (`timeline.json`) & 24kHz Audio Synthesis |
 
 ---
+
+
+---
+
+## ⚡ Two Playbook Flavors / 两种运行版本
+
+This repository offers two distinct, modular playbooks:
+
+### 1. `playbook-codex-gemini` (Full Dispatched Multi-Agent Pipeline)
+- **Zero Local Overhead**: Antigravity acts purely as an orchestrator/dispatcher.
+- **Externalized Intelligence**:
+  - **Codex CLI (`gpt-6.2-sol max`)**: Research, coding, self-review.
+  - **Gemini 4 Hydrogen API (via `key.txt`)**: Task scripting, proposal audit gate, ledger/docs, storyboard director.
+  - **Gemini TTS**: High-fidelity speech synthesis.
+- **Best For**: Mission-critical software engineering, zero-defect refactoring, and multimedia delivery.
+
+### 2. `playbook-codex-direct` (Codex Direct Relay & Human Translation)
+- **Direct Dispatch**: Immediately forwards user tasks to Codex CLI without multi-stage gates.
+- **Model Freedom**: User picks any model in chat (`gpt-6.2-sol max`, `gpt-6.2-astra low`, `gpt-5.6-sol`, etc.); defaults to `gpt-6.2-sol max`.
+- **Human Translation**: Antigravity translates raw diffs and technical execution logs into clear, jargon-free plain human language ("人话").
+- **Best For**: Fast feature iteration, lightweight data processing, bug patching, and effortless handover reports.
 
 ## 🏗️ Architecture & Flow
 

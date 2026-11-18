@@ -87,15 +87,17 @@ def call(prompt: str, system: str, model: str, key: str, retries: int) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--prompt-file")
+    ap.add_argument("--prompt", "-p", help="Inline prompt string")
     ap.add_argument("--out")
     ap.add_argument("--system", default="")
-    ap.add_argument("--retries", type=int, default=6)
+    ap.add_argument("--model", default=None)
+    ap.add_argument("--retries", type=int, default=8)
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args()
 
     key_file = os.environ.get("PLAYBOOK_KEY_FILE", DEFAULT_KEY_FILE)
     label = os.environ.get("PLAYBOOK_KEY_LABEL", DEFAULT_LABEL)
-    model = os.environ.get("PLAYBOOK_HYDROGEN_MODEL", DEFAULT_MODEL)
+    model = args.model or os.environ.get("PLAYBOOK_HYDROGEN_MODEL", DEFAULT_MODEL)
     key = load_key(key_file, label)
 
     if args.selftest:
@@ -104,10 +106,13 @@ def main() -> None:
         print(json.dumps({"model": model, "ok": ok, "attempts": res["attempts"], "usage": res["usage"]}))
         sys.exit(0 if ok else 1)
 
-    if not args.prompt_file:
-        sys.exit("[hydrogen_call] --prompt-file is required (or use --selftest)")
-    with open(args.prompt_file, "r", encoding="utf-8") as fh:
-        prompt = fh.read()
+    if args.prompt:
+        prompt = args.prompt
+    elif args.prompt_file:
+        with open(args.prompt_file, "r", encoding="utf-8") as fh:
+            prompt = fh.read()
+    else:
+        sys.exit("[hydrogen_call] Either --prompt or --prompt-file is required (or use --selftest)")
     res = call(prompt, args.system, model, key, args.retries)
     if args.out:
         with open(args.out, "w", encoding="utf-8") as fh:
