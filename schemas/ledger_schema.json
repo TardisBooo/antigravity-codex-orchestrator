@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CodexExecutionLedger",
+  "description": "Task execution ledger (台账) compiled by Gemini 3.8 Flash Medium from Codex execution events and git state",
+  "type": "object",
+  "properties": {
+    "task_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "status": { "type": "string", "enum": ["SUCCESS", "FAILED", "AUDIT_REJECTED", "PARTIAL"] },
+    "execution_metrics": {
+      "type": "object",
+      "properties": {
+        "duration_seconds": { "type": "number" },
+        "input_tokens": { "type": "integer" },
+        "output_tokens": { "type": "integer" },
+        "cached_tokens": { "type": "integer" },
+        "turns_count": { "type": "integer" }
+      },
+      "required": ["input_tokens", "output_tokens"]
+    },
+    "file_operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "operation": { "type": "string", "enum": ["CREATE", "MODIFY", "DELETE", "READ"] },
+          "lines_added": { "type": "integer" },
+          "lines_removed": { "type": "integer" }
+        },
+        "required": ["path", "operation"]
+      }
+    },
+    "commands_executed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "command": { "type": "string" },
+          "exit_code": { "type": "integer" },
+          "status": { "type": "string" }
+        }
+      }
+    },
+    "audit_summary": {
+      "type": "object",
+      "properties": {
+        "auditor": { "type": "string", "default": "Argon Medium" },
+        "verdict": { "type": "string", "enum": ["APPROVED", "REVISE_REQUIRED"] },
+        "audit_notes": { "type": "string" }
+      }
+    },
+    "documentation_summary": {
+      "type": "string",
+      "description": "Executive summary written by Gemini 3.8 Flash Medium"
+    }
+  },
+  "required": ["task_id", "status", "execution_metrics", "file_operations", "documentation_summary"]
+}

@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment and secrets
+.env
+*.local
+*.log
+
+# Temp artifacts & caches
+*.wav
+*.mp3
+*.mp4
+.system_generated/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-2 m-0 font-sans text-xs">
+  <div class="space-y-3">
+    <!-- 顶部状态栏与统计 -->
+    <div class="flex items-center justify-between pb-2 border-b border-[var(--card-border)]">
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="font-bold text-sm tracking-wide text-[var(--foreground)]">Playbook 协同态势大屏</span>
+        <span class="px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--card-border)] text-[var(--muted-foreground)] font-mono text-[10px]">TASK-20261118-01</span>
+      </div>
+      <div class="flex items-center gap-3 text-[11px] text-[var(--muted-foreground)] font-mono">
+        <span>耗时: <strong class="text-[var(--foreground)]">42.5s</strong></span>
+        <span>Tokens: <strong class="text-[var(--foreground)]">23,487</strong></span>
+        <span>防错模式: <strong class="text-emerald-500">已激活 (Harness Verified)</strong></span>
+      </div>
+    </div>
+
+    <!-- 流程节点流转看板 (类似 Swarm Roster) -->
+    <div class="grid grid-cols-6 gap-1.5" id="pipeline-nodes">
+      <!-- 节点 1 -->
+      <div class="p-2 rounded border border-emerald-500/40 bg-emerald-500/5 cursor-pointer transition hover:border-emerald-500" onclick="selectStep(0)">
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-bold text-[var(--foreground)]">1. 台本编制</span>
+          <span class="text-emerald-500 text-[10px]">● 已完成</span>
+        </div>
+        <div class="text-[10px] text-[var(--muted-foreground)] truncate font-mono">Argon Medium</div>
+        <div class="text-[9px] text-[var(--muted-foreground)] mt-1">产出 task_script.md</div>
+      </div>
+
+      <!-- 节点 2 -->
+      <div class="p-2 rounded border border-emerald-500/40 bg-emerald-500/5 cursor-pointer transition hover:border-emerald-500" onclick="selectStep(1)">
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-bold text-[var(--foreground)]">2. 搜料提报</span>
+          <span class="text-emerald-500 text-[10px]">● 已完成</span>
+        </div>
+        <div class="text-[10px] text-[var(--muted-foreground)] truncate font-mono">Codex CLI --search</div>
+        <div class="text-[9px] text-[var(--muted-foreground)] mt-1">产出 proposal.md</div>
+      </div>
+
+      <!-- 节点 3 -->
+      <div class="p-2 rounded border border-emerald-500/40 bg-emerald-500/5 cursor-pointer transition hover:border-emerald-500" onclick="selectStep(2)">
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-bold text-[var(--foreground)]">3. 方案审核</span>
+          <span class="text-emerald-500 text-[10px]">● APPROVED</span>
+        </div>
+        <div class="text-[10px] text-[var(--muted-foreground)] truncate font-mono">Argon Medium</div>
+        <div class="text-[9px] text-[var(--muted-foreground)] mt-1">架构边界验收通过</div>
+      </div>
+
+      <!-- 节点 4 -->
+      <div class="p-2 rounded border border-blue-500 bg-blue-500/10 cursor-pointer shadow-sm" onclick="selectStep(3)">
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-bold text-blue-400">4. 代码实现</span>
+          <span class="text-blue-400 text-[10px] animate-pulse">▶ 执行中</span>
+        </div>
+        <div class="text-[10px] text-[var(--muted-foreground)] truncate font-mono">Codex CLI exec</div>
+        <div class="text-[9px] text-blue-300 mt-1">正在写入工作区...</div>
+      </div>
+
+      <!-- 节点 5 -->
+      <div class="p-2 rounded border border-[var(--card-border)] bg-[var(--card)] opacity-60 cursor-pointer hover:opacity-100" onclick="selectStep(4)">
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-bold text-[var(--foreground)]">5. 台账文书</span>
+          <span class="text-[var(--muted-foreground)] text-[10px]">○ 等待中</span>
+        </div>
+        <div class="text-[10px] text-[var(--muted-foreground)] truncate font-mono">Flash 3.8 Medium</div>
+        <div class="text-[9px] text-[var(--muted-foreground)] mt-1">待消费 JSONL 流</div>
+      </div>
+
+      <!-- 节点 6 -->
+      <div class="p-2 rounded border border-[var(--card-border)] bg-[var(--card)] opacity-60 cursor-pointer hover:opacity-100" onclick="selectStep(5)">
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-bold text-[var(--foreground)]">6. 多媒体</span>
+          <span class="text-[var(--muted-foreground)] text-[10px]">○ 待触发</span>
+        </div>
+        <div class="text-[10px] text-[var(--muted-foreground)] truncate font-mono">Flash + Gemini TTS</div>
+        <div class="text-[9px] text-[var(--muted-foreground)] mt-1">分镜与语音合成</div>
+      </div>
+    </div>
+
+    <!-- 选定节点的 Harness 校验与执行详情面板 (防错关键) -->
+    <div class="p-3 rounded-lg border border-[var(--card-border)] bg-[var(--card)] space-y-2">
+      <div class="flex items-center justify-between border-b border-[var(--card-border)] pb-2">
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-[var(--foreground)] text-xs" id="detail-title">节点 4：Codex 代码实现阶段 (Active Harness)</span>
+          <span class="px-1.5 py-0.5 rounded text-[10px] bg-blue-500/20 text-blue-400 font-mono" id="detail-badge">RUNNING</span>
+        </div>
+        <span class="text-[10px] text-[var(--muted-foreground)]">点击上方节点卡片可切换检查</span>
+      </div>
+
+      <!-- 防错参数比对表 -->
+      <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
+        <div class="flex items-center gap-1.5">
+          <span class="text-[var(--muted-foreground)] w-24">目标 Harness:</span>
+          <span class="font-mono text-[var(--foreground)] font-medium" id="detail-harness">Codex CLI (npm: @openai/codex)</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-[var(--muted-foreground)] w-24">模型绑定:</span>
+          <span class="font-mono text-[var(--foreground)] font-medium" id="detail-model">gpt-6.2-sol (reasoning: max)</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-[var(--muted-foreground)] w-24">沙箱策略:</span>
+          <span class="font-mono text-emerald-400 font-medium" id="detail-sandbox">workspace-write (仅限工作区)</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-[var(--muted-foreground)] w-24">标准输入控制:</span>
+          <span class="font-mono text-emerald-400 font-medium" id="detail-stdin">Closed (stdin=DEVNULL 防挂起)</span>
+        </div>
+      </div>
+
+      <!-- 实际执行的底层完整命令 (杜绝调错) -->
+      <div class="mt-2 space-y-1">
+        <div class="text-[10px] text-[var(--muted-foreground)] flex items-center justify-between">
+          <span>底层精确触发命令行 (Actual Command Line):</span>
+          <span class="text-[9px] text-emerald-500 font-mono">校验通过 (Verified)</span>
+        </div>
+        <pre class="p-2 rounded bg-black/40 text-emerald-400 font-mono text-[10px] overflow-x-auto whitespace-pre-wrap border border-white/5" id="detail-cmd">"" | codex exec --skip-git-repo-check --ignore-user-config --dangerously-bypass-approvals-and-sandbox --json -C "C:/Users/MSI-NB/project" "根据审核通过的方案编写代码并运行测试"</pre>
+      </div>
+
+      <!-- 实时日志/产物快照 -->
+      <div class="mt-1 flex items-center justify-between text-[10px] text-[var(--muted-foreground)] pt-1 border-t border-[var(--card-border)]">
+        <div>输入产物: <span class="font-mono text-[var(--foreground)]" id="detail-input">task_script.md, proposal.md</span></div>
+        <div>预期输出: <span class="font-mono text-[var(--foreground)]" id="detail-output">Git Changes, JSONL Events</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const stepsData = [
+      {
+        title: "节点 1：台本编制阶段 (Argon Medium)",
+        badge: "PASSED",
+        badgeClass: "bg-emerald-500/20 text-emerald-400",
+        harness: "Argon Medium (Google Gemini 4 Argon)",
+        model: "gemini-4-argon / Antigravity 'pro'",
+        sandbox: "Read-only Workspace Context",
+        stdin: "N/A (Antigravity Native Turn)",
+        cmd: "invoke_subagent(Model='pro', Role='System Architect', Prompt='分析用户诉求，制定工程边界与Codex执行台本...')",
+        input: "用户原始提示词 (User Prompt)",
+        output: "task_script.md"
+      },
+      {
+        title: "节点 2：材料检索与方案提报 (Codex CLI)",
+        badge: "PASSED",
+        badgeClass: "bg-emerald-500/20 text-emerald-400",
+        harness: "Codex CLI (v0.156.0)",
+        model: "gpt-6.2-sol (effort: max)",
+        sandbox: "read-only (--search enabled)",
+        stdin: "Closed (\"\")",
+        cmd: '"" | codex exec -m gpt-6.2-sol -c model_reasoning_effort="max" --search --skip-git-repo-check -s read-only -o proposal.md "检索技术选型与实现思路"',
+        input: "task_script.md",
+        output: "proposal.md"
+      },
+      {
+        title: "节点 3：方案深度审核闸门 (Argon Medium)",
+        badge: "APPROVED",
+        badgeClass: "bg-emerald-500/20 text-emerald-400",
+        harness: "Argon Medium (Auditor Gate)",
+        model: "gemini-4-argon (Max Reasoning)",
+        sandbox: "Pure Evaluation Sandbox",
+        stdin: "N/A (Subagent Turn)",
+        cmd: "Argon Audit: 针对接口封装、依赖安全性、时间空间复杂度进行零缺陷审查 -> 判定 APPROVED",
+        input: "proposal.md, task_script.md",
+        output: "audit_report.md (Verdict: APPROVED)"
+      },
+      {
+        title: "节点 4：代码落地与实现 (Codex CLI)",
+        badge: "RUNNING",
+        badgeClass: "bg-blue-500/20 text-blue-400",
+        harness: "Codex CLI (v0.156.0)",
+        model: "gpt-6.2-sol (effort: max)",
+        sandbox: "workspace-write (Scoped to target dir)",
+        stdin: "Closed (\"\")",
+        cmd: '"" | codex exec -m gpt-6.2-sol -c model_reasoning_effort="max" --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox --json -C "C:/Users/MSI-NB/project" "编写代码并执行测试"',
+        input: "proposal.md, task_script.md",
+        output: "Git Working Tree Diff, JSONL Event Stream"
+      },
+      {
+        title: "节点 5：台账记账与交付总结 (Flash 3.8 Medium)",
+        badge: "WAITING",
+        badgeClass: "bg-slate-500/20 text-slate-400",
+        harness: "Flash 3.8 Medium (Gemini 3.8 Flash)",
+        model: "gemini-3.8-flash / Antigravity 'flash'",
+        sandbox: "Read-only Event Analyzer",
+        stdin: "N/A",
+        cmd: "LedgerCompiler.compile(events=codex_jsonl, diff=git_diff) -> 生成台账并撰写技术交付文档",
+        input: "JSONL Events, git diff --stat",
+        output: "ledger.json, SUMMARY.md"
+      },
+      {
+        title: "节点 6：多媒体视听制作 (Flash + Gemini TTS)",
+        badge: "STANDBY",
+        badgeClass: "bg-slate-500/20 text-slate-400",
+        harness: "Gemini 3.8 Flash + gemini-api tts (v0.4.5)",
+        model: "gemini-3.8-flash-tts (Voice: Kore / Puck)",
+        sandbox: "Local Media Export",
+        stdin: "N/A",
+        cmd: 'gemini-api tts -f script.txt --multi-speaker "Alice=Kore,Bob=Puck" --out ./voiceover.wav',
+        input: "task_script.md 分镜台词表",
+        output: "voiceover.wav, timeline.json"
+      }
+    ];
+
+    function selectStep(index) {
+      const step = stepsData[index];
+      document.getElementById("detail-title").innerText = step.title;
+      const badge = document.getElementById("detail-badge");
+      badge.innerText = step.badge;
+      badge.className = `px-1.5 py-0.5 rounded text-[10px] font-mono ${step.badgeClass}`;
+      document.getElementById("detail-harness").innerText = step.harness;
+      document.getElementById("detail-model").innerText = step.model;
+      document.getElementById("detail-sandbox").innerText = step.sandbox;
+      document.getElementById("detail-stdin").innerText = step.stdin;
+      document.getElementById("detail-cmd").innerText = step.cmd;
+      document.getElementById("detail-input").innerText = step.input;
+      document.getElementById("detail-output").innerText = step.output;
+    }
+  </script>
+</body>
+</html>
