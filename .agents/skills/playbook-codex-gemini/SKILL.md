@@ -2,7 +2,7 @@
 name: playbook-codex-gemini
 description: >-
   Modular, opt-in engineering playbook orchestrating Codex CLI (search, code, self-review),
-  Argon Medium (scripting, audit), Flash 3.8 Medium (ledger, docs), and optional Gemini 3.8 Flash + TTS (multimedia).
+  Argon Medium (scripting, audit), Gemini 4 Hydrogen via key-file API (ledger, docs), and optional Gemini 3.8 Flash + TTS (multimedia).
   Features Swarm-like visual pipeline dashboards and strict pre-flight harness verification gates.
   Codex defaults to gpt-6.2-sol with reasoning effort max.
   Activate when the user asks to execute, follow, customize, or trigger the Codex collaborative playbook or multi-agent workflow.
@@ -33,6 +33,12 @@ playbook_config:
   enable_codex_review: true       # 是否让 Codex 执行自身 review
   enable_flash_ledger: true       # 是否生成任务台账与技术文档
   enable_multimedia: false        # 是否激活多媒体视听制作 (默认关闭，按需开启)
+
+  # 阶段五 台账/文档 引擎 (替换原 Flash 3.8 Medium)
+  ledger_engine: "hydrogen-api"                   # 通过 key 文件调用 Hydrogen API
+  hydrogen_model: "gemini-4-hydrogen"
+  hydrogen_key_file: "E:\\Workspaces\\key.txt"     # 可用环境变量 PLAYBOOK_KEY_FILE 覆盖
+  hydrogen_key_label: "Gemini 4 Hydrogen"         # key.txt 中该 key 上方的标题行
 
   # 运行参数
   max_audit_retries: 2            # 方案审核未通过时的最大修改轮次
@@ -97,11 +103,21 @@ playbook_config:
 
 ---
 
-## 阶段五：台账记账与文档撰写 (Ledger & Scribing Phase - Flash 3.8 Medium)
-- **负责角色**: 文书与管家 (Scribe / Gemini 3.8 Flash)
-- **执行逻辑**: 解析 Codex 的 JSONL 日志提取 Token 与执行耗时，结合 Git Diff 输出：
+## 阶段五：台账记账与文档撰写 (Ledger & Scribing Phase - Gemini 4 Hydrogen API)
+- **负责角色**: 文书与管家 (Scribe)，由 **`gemini-4-hydrogen`** 通过 key 文件里的 API 真实调用，不再由主会话模型代演。
+- **执行前必做（Hydrogen 可用性自检）**: 每次进入本阶段先跑一次自检，失败则停下并报告，不得改由主会话代写。
+  ```powershell
+  python "<PLAYBOOK_DIR>/scripts/hydrogen_call.py" --selftest
+  ```
+  自检输出 `{"ok": true, ...}` 才继续。`503 high demand` 属于瞬时错误，脚本内置退避重试，不算失败。
+- **执行逻辑**: 主会话先把 Codex 的 JSONL 用量、`git diff --stat`、审核结论整理成输入文件，再交给 Hydrogen：
+  ```powershell
+  python "<PLAYBOOK_DIR>/scripts/hydrogen_call.py" --prompt-file ledger_input.md --out ledger.json --system "只输出符合 ledger_schema.json 的 JSON"
+  python "<PLAYBOOK_DIR>/scripts/hydrogen_call.py" --prompt-file summary_input.md --out SUMMARY.md
+  ```
   - `ledger.json` (结构化数据)
   - `SUMMARY.md` (交付总结)
+- **Key 处理**: key 只在调用时从 `hydrogen_key_file` 读取，经子进程环境变量传给 `gemini-api`。禁止回显、写入日志、写入仓库或粘贴进命令行。
 
 ---
 

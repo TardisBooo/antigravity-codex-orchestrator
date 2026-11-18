@@ -27,8 +27,10 @@
 | `enable_codex_search` | `true` | 是否调用 Codex 进行全网/项目代码资料搜集 |
 | `enable_argon_audit` | `true` | 是否让 Argon Medium 对 Codex 方案进行严格边界与安全性深度审核 |
 | `enable_codex_review` | `true` | 是否在代码编写后触发 Codex 内部自审 (`codex review --uncommitted`) |
-| `enable_flash_ledger` | `true` | 是否由 Flash 3.8 Medium 生成机器可读台账 (`ledger.json`) 与总结 |
+| `enable_flash_ledger` | `true` | 是否由 Gemini 4 Hydrogen (key 文件 API) 生成机器可读台账 (`ledger.json`) 与总结 |
 | `enable_multimedia` | `false` | 是否激活多媒体视听制作（分镜导演 + Gemini TTS 语音生成） |
+| `hydrogen_model` | `"gemini-4-hydrogen"` | 阶段五台账/文档引擎 |
+| `hydrogen_key_file` | `"E:\\Workspaces\\key.txt"` | Hydrogen key 所在文件，可用环境变量 `PLAYBOOK_KEY_FILE` 覆盖 |
 | `max_audit_retries` | `2` | 审核不通过时的最大修改重试轮次 |
 
 ---
@@ -101,10 +103,19 @@
 ---
 
 ### 阶段五：台账记账与技术文档 (Ledger & Scribing Phase)
-- **负责角色**: **Flash 3.8 Medium** (Gemini 3.8 Flash / 文书与管家)
-- **任务目标**: 统计工程开销并编写交付总结。
+- **负责角色**: **Gemini 4 Hydrogen**（`gemini-4-hydrogen`，通过 `key.txt` 里的 API 真实调用，不由主会话模型代演）
+- **执行前必做（可用性自检）**: 每次进入本阶段先自检，未通过则停下报告，不得改由主会话代写。
+  ```powershell
+  python scripts/hydrogen_call.py --selftest
+  ```
+  `503 high demand` 是瞬时错误，脚本内置退避重试，不算失败。
+- **执行逻辑**: 主会话把 Codex JSONL 用量、`git diff --stat`、审核结论整理成输入文件，再交给 Hydrogen：
+  ```powershell
+  python scripts/hydrogen_call.py --prompt-file ledger_input.md --out ledger.json --system "只输出符合 ledger_schema.json 的 JSON"
+  python scripts/hydrogen_call.py --prompt-file summary_input.md --out SUMMARY.md
+  ```
+- **Key 处理**: 只在调用时从 `hydrogen_key_file` 读取，经子进程环境变量传给 `gemini-api`。禁止回显、写日志、入库或粘贴进命令行。
 - **产出物**: `ledger.json` 与 `SUMMARY.md`。
-
 ---
 
 ### 阶段六 (可选)：多媒体视听制作 (Multimedia Phase)

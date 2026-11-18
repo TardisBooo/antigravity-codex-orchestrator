@@ -1,6 +1,6 @@
 # ⚡ Antigravity Codex Orchestrator
 
-> **联合 Google Antigravity、OpenAI Codex CLI (`gpt-6.2-sol max`)、Gemini 4 Argon、Gemini 3.8 Flash 与 Gemini TTS 的高可用多智能体协同 Playbook。**
+> **联合 Google Antigravity、OpenAI Codex CLI (`gpt-6.2-sol max`)、Gemini 4 Argon、Gemini 4 Hydrogen 与 Gemini TTS 的高可用多智能体协同 Playbook。**
 
 <p align="center">
   <a href="README.md">English</a> | <strong>简体中文</strong>
@@ -26,7 +26,7 @@
 | **总控调度 (Hub)** | **Google Antigravity (AGY)** | 智能体生命周期与工作区记忆 | 任务协调中枢与全局状态机 |
 | **执行引擎 (Worker)** | **OpenAI Codex CLI** | `gpt-6.2-sol` (推理强度: `max`) | 资料检索 (`--search`)、代码编写重构、自我代码评审 (`codex review`) |
 | **首席架构师与审核** | **Gemini 4 Argon** | `gemini-4-argon` / Antigravity Pro | 编写任务台本 (`task_script.md`)、深度方案审核闸门 |
-| **台账管家与文书** | **Gemini 3.8 Flash** | `gemini-3.8-flash` / Antigravity Flash | 解析 JSONL 事件流、生成结构化台账 (`ledger.json`) 与交接文档 |
+| **台账管家与文书** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen`，经 key 文件调用 (`scripts/hydrogen_call.py`) | 解析 JSONL 事件流、生成结构化台账 (`ledger.json`) 与交接文档 |
 | **多媒体导演与配音** | **Gemini 3.8 Flash + TTS** | `gemini-3.8-flash-tts` (24kHz WAV) | 演示分镜剪辑规划、多角色拟真语音合成 (`Kore`/`Puck`) |
 
 ---
@@ -40,7 +40,7 @@ sequenceDiagram
     participant AGY as Antigravity (总控中枢)
     participant Argon as Gemini 4 Argon (编剧/审核)
     participant Codex as Codex CLI (gpt-6.2-sol max)
-    participant Flash as Gemini 3.8 Flash (台账/文档)
+    participant Flash as Gemini 4 Hydrogen API (台账/文档)
     participant Media as Gemini TTS & Flash (多媒体)
 
     User->>AGY: 提交复杂开发或重构任务
@@ -175,7 +175,9 @@ playbook_config:
   enable_codex_search: true       # 使用 Codex 联网/搜集材料
   enable_argon_audit: true        # Gemini 4 Argon 深度方案审核
   enable_codex_review: true       # 自动运行 `codex review --uncommitted`
-  enable_flash_ledger: true       # 编译 ledger.json 与 SUMMARY.md
+  enable_flash_ledger: true       # 编译 ledger.json 与 SUMMARY.md (Hydrogen API)
+  hydrogen_model: "gemini-4-hydrogen"
+  hydrogen_key_file: "E:\\Workspaces\\key.txt"   # 或环境变量 PLAYBOOK_KEY_FILE，切勿提交 key
   enable_multimedia: false        # 视频分镜导演与 Gemini TTS 音频合成
   
   # 语音音色

@@ -44,7 +44,7 @@
 - **输出物**: 变更代码、构建测试日志、`review_notes.md`
 
 ### 阶段三：台账交割与技术文档 (Handover & Scribing)
-- **Flash 3.8 介入**:
+- **Gemini 4 Hydrogen (API) 介入**:
   - 提取 Codex 执行的 JSONL 事件流与 Git Diff。
   - 生成 `ledger.json` 与 `CHANGELOG.md`。
 

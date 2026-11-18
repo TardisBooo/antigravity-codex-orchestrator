@@ -1,6 +1,6 @@
 # ⚡ Antigravity Codex Orchestrator
 
-> **The Autonomous Hybrid Multi-Agent Playbook uniting Google Antigravity, OpenAI Codex CLI (`gpt-6.2-sol max`), Gemini 4 Argon, Gemini 3.8 Flash & Gemini TTS.**
+> **The Autonomous Hybrid Multi-Agent Playbook uniting Google Antigravity, OpenAI Codex CLI (`gpt-6.2-sol max`), Gemini 4 Argon, Gemini 4 Hydrogen & Gemini TTS.**
 
 <p align="center">
   <strong>English</strong> | <a href="README.zh-CN.md">简体中文</a>
@@ -28,7 +28,7 @@ Instead of locking developers into brittle, black-box scripts, this playbook lev
 | **Orchestration Hub** | **Google Antigravity (AGY)** | Agent Lifecycle & Workspace Memory | Task Coordinator & State Machine |
 | **Execution Worker** | **OpenAI Codex CLI** | `gpt-6.2-sol` (reasoning: `max`) | Research (`--search`), Code Generation, Self-Review |
 | **Chief Architect & Auditor** | **Gemini 4 Argon** | `gemini-4-argon` / Antigravity Pro | Task Scripting (`task_script.md`), Strict Proposal Audit Gate |
-| **Ledger Master & Scribe** | **Gemini 3.8 Flash** | `gemini-3.8-flash` / Antigravity Flash | JSONL Event Parsing, Structured Ledger (`ledger.json`), Docs |
+| **Ledger Master & Scribe** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` via key file (`scripts/hydrogen_call.py`) | JSONL Event Parsing, Structured Ledger (`ledger.json`), Docs |
 | **Multimedia Director & TTS** | **Gemini 3.8 Flash + TTS** | `gemini-3.8-flash-tts` (24kHz WAV) | Visual Storyboarding, Multi-Speaker Voiceover (`Kore`/`Puck`) |
 
 ---
@@ -42,7 +42,7 @@ sequenceDiagram
     participant AGY as Antigravity (Hub)
     participant Argon as Gemini 4 Argon (Architect/Auditor)
     participant Codex as Codex CLI (gpt-6.2-sol max)
-    participant Flash as Gemini 3.8 Flash (Ledger & Docs)
+    participant Flash as Gemini 4 Hydrogen API (Ledger & Docs)
     participant Media as Gemini TTS & Flash (Multimedia)
 
     User->>AGY: Submit Complex Task / Refactor Goal
@@ -177,7 +177,9 @@ playbook_config:
   enable_codex_search: true       # Search web/docs with Codex
   enable_argon_audit: true        # Gemini 4 Argon deep reasoning audit
   enable_codex_review: true       # Automatic `codex review --uncommitted`
-  enable_flash_ledger: true       # Compiles ledger.json and SUMMARY.md
+  enable_flash_ledger: true       # Compiles ledger.json and SUMMARY.md (Hydrogen API)
+  hydrogen_model: "gemini-4-hydrogen"
+  hydrogen_key_file: "E:\\Workspaces\\key.txt"   # or env PLAYBOOK_KEY_FILE; never commit keys
   enable_multimedia: false        # Direct video timeline & Gemini TTS audio
   
   # Multimedia Voice
