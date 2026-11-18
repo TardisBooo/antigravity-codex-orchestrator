@@ -13,6 +13,8 @@
 [![Auditor Model](https://img.shields.io/badge/Auditor-Gemini%204%20Argon-orange.svg)](https://ai.google.dev)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
+> **Interactive benchmark article:** Explore the [GitHub Pages benchmark report](https://tardisbooo.github.io/antigravity-codex-orchestrator/) for the side-by-side Playbook and Codex CLI evaluation, raw traces, and artifacts.
+
 ---
 
 ## 🌟 Overview
