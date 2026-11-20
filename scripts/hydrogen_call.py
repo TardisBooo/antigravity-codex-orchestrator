@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Call Gemini 4 Hydrogen with a key read from a local key file.
+"""Call Gemini 4 Hydrogen with explicitly configured credentials.
 
 Used by playbook Phase 5 (ledger and docs) and any other Hydrogen step.
 The key is read at call time and passed to `gemini-api` through the child
@@ -9,10 +9,11 @@ Usage:
   python hydrogen_call.py --prompt-file in.md --out out.md [--system "..."]
   python hydrogen_call.py --selftest
 
-Environment overrides:
-  PLAYBOOK_KEY_FILE   path to the key file       (default E:\\Workspaces\\key.txt)
-  PLAYBOOK_KEY_LABEL  heading above the key      (default "Gemini 4 Hydrogen")
-  PLAYBOOK_HYDROGEN_MODEL                        (default gemini-4-hydrogen)
+Environment:
+  GEMINI_API_KEY           Gemini credential
+  PLAYBOOK_KEY_FILE        opt-in path to a labelled key file
+  PLAYBOOK_KEY_LABEL       heading above the key (default "Gemini 4 Hydrogen")
+  PLAYBOOK_HYDROGEN_MODEL  model override (default gemini-4-hydrogen)
 """
 import argparse
 import json
@@ -22,7 +23,6 @@ import subprocess
 import sys
 import time
 
-DEFAULT_KEY_FILE = r"E:\Workspaces\key.txt"
 DEFAULT_LABEL = "Gemini 4 Hydrogen"
 DEFAULT_MODEL = "gemini-4-hydrogen"
 RETRYABLE = ("503", "429", "high demand", "overloaded", "unavailable", "timeout")
@@ -63,7 +63,7 @@ def call(prompt: str, system: str, model: str, key: str, retries: int) -> dict:
             cmd, input=prompt, capture_output=True, text=True, encoding="utf-8",
             env=env, shell=(os.name == "nt"),
         )
-        blob = (proc.stdout or "") + (proc.stderr or "")
+        blob = ((proc.stdout or "") + (proc.stderr or "")).replace(key, "[redacted]")
         if proc.returncode == 0:
             try:
                 payload = json.loads(proc.stdout)
@@ -95,10 +95,13 @@ def main() -> None:
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args()
 
-    key_file = os.environ.get("PLAYBOOK_KEY_FILE", DEFAULT_KEY_FILE)
-    label = os.environ.get("PLAYBOOK_KEY_LABEL", DEFAULT_LABEL)
     model = args.model or os.environ.get("PLAYBOOK_HYDROGEN_MODEL", DEFAULT_MODEL)
-    key = load_key(key_file, label)
+    key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not key:
+        key_file = os.environ.get("PLAYBOOK_KEY_FILE")
+        if not key_file:
+            sys.exit("[hydrogen_call] Set GEMINI_API_KEY or explicitly set PLAYBOOK_KEY_FILE.")
+        key = load_key(key_file, os.environ.get("PLAYBOOK_KEY_LABEL", DEFAULT_LABEL))
 
     if args.selftest:
         res = call("Reply with exactly: HYDROGEN_OK", "", model, key, args.retries)

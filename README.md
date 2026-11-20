@@ -6,6 +6,8 @@
   <strong>English</strong> | <a href="README.zh-CN.md">简体中文</a>
 </p>
 
+[Install the direct plugin](#install-the-direct-plugin) to run a task through Codex CLI from Antigravity and review its changes and tests in plain language.
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Antigravity](https://img.shields.io/badge/Antigravity-2.0%2B-purple.svg)](https://deepmind.google/technologies/gemini/)
 [![Codex CLI](https://img.shields.io/badge/OpenAI%20Codex%20CLI-v0.156%2B-green.svg)](https://github.com/openai/codex)
@@ -27,8 +29,8 @@ Instead of locking developers into brittle, black-box scripts, this playbook lev
 |---|---|---|---|
 | **Orchestration Hub** | **Google Antigravity (AGY)** | Lightweight Dispatcher & State Machine | Pure Orchestration, Pre-flight Verification, Translation (No heavy generation) |
 | **Execution Engine** | **OpenAI Codex CLI** | `gpt-6.2-sol` (reasoning: `max` / selectable) | Research (`--search`), Code Generation, Self-Review (`codex review`) |
-| **Architect & Auditor Gate** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` via `key.txt` | Phase 1 Task Scripting (`task_script.md`) & Phase 3 Proposal Audit Gate |
-| **Ledger Master & Scribe** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` via `key.txt` | Phase 5 Event Parsing, Structured Ledger (`ledger.json`) & Docs |
+| **Architect & Auditor Gate** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` | Phase 1 Task Scripting (`task_script.md`) & Phase 3 Proposal Audit Gate |
+| **Ledger Master & Scribe** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` | Phase 5 Event Parsing, Structured Ledger (`ledger.json`) & Docs |
 | **Multimedia Director & TTS** | **Hydrogen (API) + Gemini TTS** | `gemini-4-hydrogen` + `gemini-3.8-flash-tts` | Phase 6 Visual Storyboarding (`timeline.json`) & 24kHz Audio Synthesis |
 
 ---
@@ -44,7 +46,7 @@ This repository offers two distinct, modular playbooks:
 - **Zero Local Overhead**: Antigravity acts purely as an orchestrator/dispatcher.
 - **Externalized Intelligence**:
   - **Codex CLI (`gpt-6.2-sol max`)**: Research, coding, self-review.
-  - **Gemini 4 Hydrogen API (via `key.txt`)**: Task scripting, proposal audit gate, ledger/docs, storyboard director.
+  - **Gemini 4 Hydrogen API**: Task scripting, proposal audit gate, ledger/docs, storyboard director.
   - **Gemini TTS**: High-fidelity speech synthesis.
 - **Best For**: Mission-critical software engineering, zero-defect refactoring, and multimedia delivery.
 
@@ -141,28 +143,22 @@ The playbook includes a standalone interactive HTML5 dashboard ([dashboard/harne
 
 ## 🚀 Quick Start
 
-### 1. Installation in Antigravity
+### Install the direct plugin
 
-Clone or copy this repository into your project's `.agents/skills` or Antigravity's global plugin directory:
+Install [Antigravity CLI](https://antigravity.google/docs/cli/install) and [Codex CLI](https://github.com/openai/codex). Sign in to Codex with `codex login`.
 
 ```bash
-# As a Project-level Skill
-git clone https://github.com/TardisBooo/antigravity-codex-orchestrator.git .agents/skills/playbook-codex-gemini
-
-# Or as a Global Antigravity Plugin
-git clone https://github.com/TardisBooo/antigravity-codex-orchestrator.git ~/.gemini/config/plugins/antigravity-codex-orchestrator
+agy plugin install https://github.com/TardisBooo/antigravity-codex-orchestrator
+agy plugin list
 ```
 
-### 2. Verify Prerequisites
+Open a session in the target workspace and run `/playbook-codex-direct`. For example, ask it to review the project's tests in read-only mode. For code changes, confirm the target workspace and permission to write. Codex sends the task and the project context it reads to its configured model provider.
 
-Ensure your environment has:
-- **Node.js** (>= 20) & **OpenAI Codex CLI** (`npm i -g @openai/codex`)
-- **Google Antigravity** or **Gemini CLI** (`gemini-api`)
-- Active authentication for both Codex (`codex login`) and Gemini (`export GEMINI_API_KEY="..."` or `gemini-api configure`)
+To remove the plugin, run `agy plugin uninstall antigravity-codex-orchestrator`.
 
-### 3. Trigger in Chat
+### Run the optional Gemini playbook
 
-Simply instruct Antigravity in your conversation:
+The Gemini playbook runs from a source checkout. It also needs Python 3, the `gemini-api` CLI, and `GEMINI_API_KEY` in your environment. The Hydrogen helper also accepts `PLAYBOOK_KEY_FILE` for a file you choose. Keep credentials outside the repository. Review which task materials, diffs, or logs each external call will receive before approving it. Follow the [full playbook](playbooks/codex_gemini_collaboration_playbook.md) for phase controls and usage.
 
 ```markdown
 # Standard execution (Defaults to gpt-6.2-sol max)
@@ -200,7 +196,6 @@ playbook_config:
   enable_codex_review: true       # Automatic `codex review --uncommitted`
   enable_flash_ledger: true       # Compiles ledger.json and SUMMARY.md (Hydrogen API)
   hydrogen_model: "gemini-4-hydrogen"
-  hydrogen_key_file: "E:\\Workspaces\\key.txt"   # or env PLAYBOOK_KEY_FILE; never commit keys
   enable_multimedia: false        # Direct video timeline & Gemini TTS audio
   
   # Multimedia Voice
@@ -214,8 +209,12 @@ playbook_config:
 
 ```text
 antigravity-codex-orchestrator/
+├── plugin.json                 # Antigravity plugin manifest for the direct relay
+├── assets/logo.png
+├── .agents/skills/playbook-codex-direct/
+│   └── SKILL.md                 # Direct relay skill
 ├── .agents/skills/playbook-codex-gemini/
-│   └── SKILL.md                 # Native Antigravity Skill Definition
+│   └── SKILL.md                 # Optional Gemini workflow skill
 ├── playbooks/
 │   └── codex_gemini_collaboration_playbook.md  # Standalone Markdown Playbook
 ├── schemas/

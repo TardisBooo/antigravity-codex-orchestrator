@@ -5,6 +5,7 @@ __pycache__/
 
 # Environment and secrets
 .env
+key.txt
 *.local
 *.log
 

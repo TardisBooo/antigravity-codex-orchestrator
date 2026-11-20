@@ -25,8 +25,8 @@
 |---|---|---|---|
 | **总控调度 (Hub)** | **Google Antigravity (AGY)** | 轻量调度网关与状态机 | 纯粹编排调度、起飞前核验与人话转译（本地不承担繁重生成） |
 | **执行引擎 (Worker)** | **OpenAI Codex CLI** | `gpt-6.2-sol` (推理: `max`，会话可自选) | 资料检索 (`--search`)、代码编写重构、自我代码评审 (`codex review`) |
-| **架构台本与方案审核** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` (经 `key.txt` 直连) | 阶段一任务台本编制 (`task_script.md`) 与阶段三方案深度审核闸门 |
-| **台账管家与文书** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` (经 `key.txt` 直连) | 阶段五解析 JSONL、生成结构化台账 (`ledger.json`) 与技术总结 |
+| **架构台本与方案审核** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` | 阶段一任务台本编制 (`task_script.md`) 与阶段三方案深度审核闸门 |
+| **台账管家与文书** | **Gemini 4 Hydrogen (API)** | `gemini-4-hydrogen` | 阶段五解析 JSONL、生成结构化台账 (`ledger.json`) 与技术总结 |
 | **视觉导演与语音合成** | **Hydrogen (API) + Gemini TTS** | `gemini-4-hydrogen` + `gemini-3.8-flash-tts` | 阶段六分镜切片规划 (`timeline.json`) 与 24kHz 拟真双角色配音合成 |
 
 ---
@@ -42,7 +42,7 @@
 - **本地零重型消耗**：Antigravity 仅负责流程状态机、起飞前核验卡与分发。
 - **全能力外部化**：
   - **Codex CLI (`gpt-6.2-sol max`)**：搜料、编码、内部自审。
-  - **Gemini 4 Hydrogen API (经 `key.txt` 调度)**：阶段一台本编制、阶段三方案审核、阶段五台账与文档、阶段六分镜导演。
+  - **Gemini 4 Hydrogen API**：阶段一台本编制、阶段三方案审核、阶段五台账与文档、阶段六分镜导演。
   - **Gemini TTS**：24kHz 语音合成。
 - **适用场景**：复杂生产级工程重构、严格安全审核与多媒体汇报交付。
 
@@ -139,28 +139,22 @@ sequenceDiagram
 
 ## 🚀 快速上手
 
-### 1. 安装到 Antigravity
+### 安装直连插件
 
-将本仓库克隆到当前项目的 `.agents/skills` 目录，或 Antigravity 的全局插件目录：
+安装 [Antigravity CLI](https://antigravity.google/docs/cli/install) 和 [Codex CLI](https://github.com/openai/codex)，然后运行 `codex login` 登录 Codex。
 
 ```bash
-# 方式 A：作为项目级 Skill 引入
-git clone https://github.com/TardisBooo/antigravity-codex-orchestrator.git .agents/skills/playbook-codex-gemini
-
-# 方式 B：作为 Antigravity 全局插件安装
-git clone https://github.com/TardisBooo/antigravity-codex-orchestrator.git ~/.gemini/config/plugins/antigravity-codex-orchestrator
+agy plugin install https://github.com/TardisBooo/antigravity-codex-orchestrator
+agy plugin list
 ```
 
-### 2. 环境前提校验
+在目标工作区打开会话，运行 `/playbook-codex-direct`。可以先请它以只读模式检查项目的测试流程。授权修改前，先确认目标工作区和写入范围。Codex 会把任务和读取到的项目上下文发给已配置的模型服务。
 
-确保本地已配置好：
-- **Node.js** (>= 20) 与 **OpenAI Codex CLI** (`npm i -g @openai/codex`)
-- **Google Antigravity** 或 **Gemini CLI** (`gemini-api`)
-- 已完成 Codex (`codex login`) 与 Gemini (`export GEMINI_API_KEY="..."` 或 `gemini-api configure`) 的认证
+卸载插件时，运行 `agy plugin uninstall antigravity-codex-orchestrator`。
 
-### 3. 在对话中自主调用
+### 运行可选的 Gemini 协同剧本
 
-你只需在 Antigravity 对话中按需下达指令，即可灵活裁切任意阶段：
+Gemini 协同剧本在源码工作区运行，需要 Python 3、`gemini-api` CLI，以及环境变量 `GEMINI_API_KEY`。Hydrogen 辅助脚本也支持通过 `PLAYBOOK_KEY_FILE` 显式指定文件。请将凭据保存在仓库之外。调用外部服务前，先核对将发出的任务材料、代码差异或日志。各阶段的运行方式见[协同剧本](playbooks/codex_gemini_collaboration_playbook.md)。
 
 ```markdown
 # 标准全量执行（默认使用 gpt-6.2-sol max）
@@ -198,7 +192,6 @@ playbook_config:
   enable_codex_review: true       # 自动运行 `codex review --uncommitted`
   enable_flash_ledger: true       # 编译 ledger.json 与 SUMMARY.md (Hydrogen API)
   hydrogen_model: "gemini-4-hydrogen"
-  hydrogen_key_file: "E:\\Workspaces\\key.txt"   # 或环境变量 PLAYBOOK_KEY_FILE，切勿提交 key
   enable_multimedia: false        # 视频分镜导演与 Gemini TTS 音频合成
   
   # 语音音色
@@ -212,8 +205,12 @@ playbook_config:
 
 ```text
 antigravity-codex-orchestrator/
+├── plugin.json                 # Antigravity 直连插件清单
+├── assets/logo.png
+├── .agents/skills/playbook-codex-direct/
+│   └── SKILL.md                 # 直连技能
 ├── .agents/skills/playbook-codex-gemini/
-│   └── SKILL.md                 # Antigravity 原生 Skill 规范文件
+│   └── SKILL.md                 # 可选 Gemini 协同剧本
 ├── playbooks/
 │   └── codex_gemini_collaboration_playbook.md  # 独立 Markdown 执行剧本
 ├── schemas/

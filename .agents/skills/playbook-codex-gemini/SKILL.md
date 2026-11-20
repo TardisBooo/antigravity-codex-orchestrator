@@ -2,7 +2,7 @@
 name: playbook-codex-gemini
 description: >-
   Modular, opt-in engineering playbook orchestrating Codex CLI (search, code, self-review),
-  Gemini 4 Hydrogen API via key.txt (task scripting, audit gate, ledger/docs, director), and Gemini TTS.
+  Gemini 4 Hydrogen API (task scripting, audit, ledger and storyboarding), and Gemini TTS.
   Local Antigravity acts strictly as a lightweight orchestrator/dispatcher, offloading all generation and review to Codex and APIs.
   Features Swarm-like visual pipeline dashboards and strict pre-flight harness verification gates.
   Codex defaults to gpt-6.2-sol with reasoning effort max.
@@ -13,12 +13,14 @@ description: >-
 
 这是一个**模块化、全外包分发、零本地重型开销、全流程可视化**的工程与多媒体协同剧本（Playbook）。
 
+此剧本需单独启用。使用前由用户设置 `GEMINI_API_KEY`，或用 `PLAYBOOK_KEY_FILE` 明确指定工作区之外的凭据文件。每次首次调用外部服务前，让用户核对将发送的任务、源代码片段、差异或日志。只提交本阶段所需的内容，先移除凭据和无关记录。
+
 ### 核心分工与设计原则：
 1. **本地 Antigravity 仅作调度中枢 (Pure Orchestrator & Dispatcher)**:
    本地默认模型**不承担实质性的复杂方案构思、代码编写或审计推演**，纯粹负责维护任务流水线状态机、执行起飞前校验卡（Pre-Flight Inspection）、安全派发外部子进程与 API 调用、以及展示全局态势看板。
 2. **所有重型工作全部外部化分发**:
    - **OpenAI Codex CLI** (`gpt-6.2-sol max`): 承担全网检索、方案初稿编制、代码落地与本地内部代码自审 (`codex review`)。
-   - **Gemini 4 Hydrogen API** (经 `key.txt` 直连): 承担阶段一（台本编制与架构契约）、阶段三（方案深度审核闸门）、阶段五（台账记账与交付文档）、阶段六（多媒体视觉分镜与导演时序切片）。
+   - **Gemini 4 Hydrogen API**: 承担阶段一（台本编制与架构契约）、阶段三（方案深度审核闸门）、阶段五（台账记账与交付文档）、阶段六（多媒体视觉分镜与导演时序切片）。
    - **Gemini TTS** (`gemini-3.8-flash-tts`): 承担拟真语音合成。
 
 ---
@@ -31,10 +33,8 @@ playbook_config:
   codex_model: "gpt-6.2-sol"       # 默认模型: gpt-6.2-sol
   codex_reasoning_effort: "max"    # 默认推理强度: max
 
-  # 外部 API 引擎配置 (阶段一、三、五、六导演全量采用 key.txt 的 Hydrogen API)
+  # 外部 API 引擎配置
   api_engine: "gemini-4-hydrogen"
-  hydrogen_key_file: "E:\\Workspaces\\key.txt"   # 可用环境变量 PLAYBOOK_KEY_FILE 覆盖
-  hydrogen_key_label: "Gemini 4 Hydrogen"       # key.txt 中该 key 上方的标识行
 
   # 可视化与防错闸门
   enable_visual_dashboard: true   # 是否渲染类似 Swarm 的态势感知看板大屏
@@ -72,11 +72,12 @@ playbook_config:
 ```
 
 若 `step_by_step_gate: true`，Antigravity 将在此处暂停等待用户确认（`Proceed [Y/n]`），用户可直接纠偏。
+写入前核对用户已经授权目标工作区和写入范围。需要额外权限时暂停，让用户确认。
 
 ---
 
 ## 阶段一：台本编制与架构契约 (Scripting Phase - Hydrogen API)
-- **负责角色**: 外部 API (`gemini-4-hydrogen`，经 `key.txt` 调度)
+- **负责角色**: 外部 API (`gemini-4-hydrogen`)
 - **执行逻辑**: 本地 Antigravity 仅将用户诉求打包为输入文件，直接派发给 Hydrogen API：
   ```powershell
   python scripts/hydrogen_call.py --prompt-file "user_goal.md" --out "task_script.md" --system "你是顶尖架构师，负责分析需求并制定工程边界契约与Codex执行指令"
@@ -89,14 +90,14 @@ playbook_config:
 - **负责角色**: 本地 Codex CLI (`gpt-6.2-sol`, reasoning effort: `max`)
 - **执行命令**:
   ```powershell
-  "" | codex exec -m gpt-6.2-sol -c model_reasoning_effort="max" --search --skip-git-repo-check -s read-only -o proposal.md "根据 task_script.md 检索技术选型与实现思路"
+  "根据 task_script.md 检索技术选型与实现思路" | codex -a on-request --search exec -m gpt-6.2-sol -c model_reasoning_effort="max" -s read-only -o proposal.md -
   ```
 - **输出**: `proposal.md`。
 
 ---
 
 ## 阶段三：方案深度审核闸门 (Proposal Audit Phase - Hydrogen API)
-- **负责角色**: 外部 API (`gemini-4-hydrogen`，经 `key.txt` 调度)
+- **负责角色**: 外部 API (`gemini-4-hydrogen`)
 - **执行逻辑**: 本地 Antigravity 将 `task_script.md` 与 Codex 的 `proposal.md` 发送给 Hydrogen API 执行零缺陷边界审查：
   ```powershell
   python scripts/hydrogen_call.py --prompt-file "audit_input.md" --out "audit_report.md" --system "你是极其严格的架构审查专家，严格检查封装性、安全隐患与复杂度，给出判定结论 APPROVED 或 REVISE_REQUIRED"
@@ -109,7 +110,7 @@ playbook_config:
 - **负责角色**: 本地 Codex CLI (`gpt-6.2-sol`, reasoning effort: `max`)
 - **执行命令**:
   ```powershell
-  "" | codex exec -m gpt-6.2-sol -c model_reasoning_effort="max" --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox --json -C "<WORK_DIR>" "编写代码并运行测试"
+  "编写代码并运行测试" | codex -a on-request exec -m gpt-6.2-sol -c model_reasoning_effort="max" -s workspace-write --json -C "<WORK_DIR>" -
   "" | codex review --uncommitted
   ```
 - **输出**: 源代码、Git Diff、自查意见、JSONL 事件流。
@@ -117,7 +118,7 @@ playbook_config:
 ---
 
 ## 阶段五：台账记账与文档撰写 (Ledger & Scribing Phase - Hydrogen API)
-- **负责角色**: 外部 API (`gemini-4-hydrogen`，经 `key.txt` 调度)
+- **负责角色**: 外部 API (`gemini-4-hydrogen`)
 - **执行前必做**: 运行自检，验证 API 可用性：
   ```powershell
   python scripts/hydrogen_call.py --selftest

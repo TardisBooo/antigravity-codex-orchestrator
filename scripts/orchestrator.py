@@ -24,38 +24,32 @@ class CodexRunner:
     def execute(self, prompt: str, search: bool = False, sandbox: str = "workspace-write", 
                 output_file: Optional[str] = None) -> Dict[str, Any]:
         """
-        Executes codex exec with --json event streaming.
-        Uses stdin=subprocess.DEVNULL to prevent Windows terminal stdin hanging.
+        Executes codex exec and parses its JSON events.
+        Passes the prompt on stdin and closes it before reading the result.
         """
-        cmd = ["codex", "exec"]
-        if self.skip_git_check:
-            cmd.append("--skip-git-repo-check")
-        
-        # Override dangerous bypass for workspace writing if requested
-        if sandbox == "workspace-write":
-            cmd.extend(["--dangerously-bypass-approvals-and-sandbox"])
-        else:
-            cmd.extend(["-s", sandbox])
-            
+        if sandbox not in {"read-only", "workspace-write"}:
+            raise ValueError("Choose read-only or workspace-write for the Codex sandbox.")
+        cmd = ["codex", "-a", "on-request"]
         if search:
             cmd.append("--search")
+        cmd.extend(["exec", "-s", sandbox])
+        if self.skip_git_check:
+            cmd.append("--skip-git-repo-check")
             
         cmd.extend(["-C", str(self.workdir), "--json", "--ignore-user-config"])
         
         if output_file:
             cmd.extend(["-o", str(Path(output_file).resolve())])
             
-        cmd.append(prompt)
+        cmd.append("-")
         
         start_time = time.time()
         print(f"[CodexRunner] Spawning Codex CLI in: {self.workdir}")
-        print(f"[CodexRunner] Prompt: {prompt[:80]}...")
         
-        process = subprocess.Popen(
+        process = subprocess.run(
             cmd,
-            stdin=subprocess.DEVNULL, # Crucial on Windows to avoid prompt hanging
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            input=prompt,
+            capture_output=True,
             text=True,
             encoding="utf-8",
             shell=True # Supports .ps1/.cmd wrapper on Windows
@@ -65,7 +59,7 @@ class CodexRunner:
         token_usage = {}
         agent_messages = []
         
-        for line in process.stdout:
+        for line in process.stdout.splitlines():
             line = line.strip()
             if not line:
                 continue
@@ -83,8 +77,6 @@ class CodexRunner:
                 # Non-JSON status lines
                 pass
                 
-        stderr_output = process.stderr.read()
-        process.wait()
         duration = round(time.time() - start_time, 2)
         
         result_text = agent_messages[-1] if agent_messages else ""
@@ -98,7 +90,7 @@ class CodexRunner:
             "token_usage": token_usage,
             "events_count": len(json_events),
             "output_text": result_text,
-            "stderr": stderr_output,
+            "stderr": process.stderr,
             "raw_events": json_events
         }
 

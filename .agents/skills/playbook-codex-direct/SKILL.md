@@ -56,11 +56,13 @@ description: >-
 - **负责角色**: 本地 Antigravity（纯转发）
 - **执行逻辑**:
   1. 解析用户指令中是否有指定 Codex 模型；若无，默认 `gpt-6.2-sol` + `effort: max`。
-  2. 针对 Windows 环境采用闭合 stdin 方式执行，防终端挂起：
-     ```powershell
-     "" | codex exec -m <CHOSEN_MODEL> -c model_reasoning_effort="<CHOSEN_EFFORT>" --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox --json -C "<WORK_DIR>" "<USER_PROMPT_AND_INSTRUCTIONS>"
+  2. 仅在用户明确要求调用 Codex 时转发。先确认目标工作区的绝对路径，并说明 Codex 可能把任务内容和读取的项目上下文发送给已配置的模型服务。目标或授权范围不清楚时，先确认再运行。
+  3. 审阅和分析使用 `read-only`。用户授权在该工作区内修改文件后，改用 `workspace-write`。只有用户明确选的是非 Git 工作目录时才传 `--skip-git-repo-check`。不要添加其他写入目录。遇到需要额外权限的操作时，停下来请用户确认，不要放宽沙箱重试。
+  4. 通过标准输入传任务内容，写入后关闭输入流。使用参数数组传递模型、推理强度和路径，避免用 shell 拼接用户输入。命令结构如下：
+     ```text
+     codex -a on-request exec --sandbox read-only -m <CHOSEN_MODEL> -c model_reasoning_effort=<CHOSEN_EFFORT> --json -C <WORK_DIR> -
      ```
-  3. 捕获 Codex 的返回日志、生成文件与 `git diff`。
+  5. 检查退出码。任务失败时，如实报告错误或待授权事项。修改成功后，在目标工作区检查 `git diff` 和测试结果。
 
 ### 阶段二：结果“人话转译”与文档总结 (Translation & Scribing Phase)
 - **负责角色**: 本地 Antigravity（转译网关）
@@ -71,7 +73,7 @@ description: >-
     2. **到底改了啥**：用最直白的大白话说明修改的核心逻辑（修改了哪个文件哪几个函数）。
     3. **如何验证效果**：给出最简单的一条测试命令或观察指标，让用户一眼看出效果。
   - **交付文件**:
-    - 在工作区生成 `SUMMARY.md`（简短有力的人话说明）。
+    - 在会话中交付简明总结。用户要求写报告时，在已授权的工作区生成 `SUMMARY.md`。
 
 ---
 

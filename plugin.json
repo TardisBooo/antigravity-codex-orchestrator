@@ -1,0 +1,27 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "antigravity-codex-orchestrator",
+  "displayName": "Codex Direct Relay",
+  "version": "0.1.0",
+  "description": "Send an engineering task from Antigravity to Codex CLI in your selected workspace. Get a plain-language summary of changes and checks.",
+  "logo": "assets/logo.png",
+  "suggestedPrompts": [
+    "Use the Codex direct playbook to review this workspace in read-only mode.",
+    "Use the Codex direct playbook to explain how tests run in this repository."
+  ],
+  "author": {
+    "name": "TardisBooo",
+    "url": "https://github.com/TardisBooo"
+  },
+  "homepage": "https://github.com/TardisBooo/antigravity-codex-orchestrator#install-the-direct-plugin",
+  "repository": "https://github.com/TardisBooo/antigravity-codex-orchestrator",
+  "license": "Apache-2.0",
+  "keywords": [
+    "codex",
+    "code-review",
+    "task-relay"
+  ],
+  "skills": [
+    "./.agents/skills/playbook-codex-direct"
+  ]
+}
